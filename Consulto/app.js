@@ -6,15 +6,27 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var session = require('express-session');
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
+//Ucitavanje modela
+var models = require('./models');
+models.sequelize.sync();
+
+//------------------------------------- Requre for routes -------------------------------------//
+
+var index_route = require('./routes/index');
+var login_route = require('./routes/login');
+var signup_route = require('./routes/signup');
+
+//--------------------------------------------------------------------------//
+
+
 
 var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
+app.set('view engine', 'ejs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -24,8 +36,16 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
-app.use('/users', users);
+//Podesavanje sesije na 1 godinu
+app.use(session({ secret: 'keyboard cat', cookie: { expires: false, maxAge: (365 * 24 * 60 * 60 * 1000) } }))
+
+//------------------------------------- Requister routes here -------------------------------------//
+
+app.use(index_route);
+app.use(login_route);
+app.use(signup_route)
+
+//--------------------------------------------------------------------------//
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

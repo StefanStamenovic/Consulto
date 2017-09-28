@@ -1,0 +1,9 @@
+﻿{
+  "config": {
+    "dbconfig": {
+      "dbname": "consulto",
+      "username": "root",
+      "password": "root"
+    }
+  }
+}

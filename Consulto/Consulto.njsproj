@@ -30,22 +30,86 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="app.js" />
+    <Compile Include="models\dbmodels\consult.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="models\dbmodels\message.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="models\dbmodels\professor.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="models\dbmodels\student.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="models\index.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="models\dbmodels\subject.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="models\viewmodels\viewmodel.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="public\lib\bootstrap.min.js" />
+    <Compile Include="public\lib\jquery-3.2.1.min.js" />
+    <Compile Include="public\lib\respond.min.js" />
     <Compile Include="routes\index.js" />
-    <Compile Include="routes\users.js" />
+    <Compile Include="routes\login.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="routes\signup.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Content Include="config\default.json">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="package.json" />
+    <Content Include="public\stylesheets\bootstrap.min.css" />
     <Content Include="public\stylesheets\main.css" />
     <Content Include="README.md" />
-    <Content Include="views\index.pug" />
-    <Content Include="views\layout.pug" />
-    <Content Include="views\error.pug" />
+    <Content Include="views\error.ejs">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="views\index.ejs">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="views\pages\chat.ejs">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="views\pages\dashboard.ejs">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="views\pages\login.ejs">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="views\pages\profile.ejs">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="views\pages\signup.ejs">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="views\partials\footer.ejs">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="views\partials\head.ejs">
+      <SubType>Code</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="models\" />
+    <Folder Include="models\dbmodels\" />
+    <Folder Include="models\viewmodels\" />
+    <Folder Include="config\" />
     <Folder Include="public\" />
     <Folder Include="public\images\" />
-    <Folder Include="public\javascripts\" />
+    <Folder Include="public\lib\" />
+    <Folder Include="public\scripts\" />
     <Folder Include="public\stylesheets\" />
     <Folder Include="routes\" />
     <Folder Include="views\" />
+    <Folder Include="views\pages\" />
+    <Folder Include="views\partials\" />
   </ItemGroup>
   <!-- Do not delete the following Import Project.  While this appears to do nothing it is a marker for setting TypeScript properties before our import that depends on them. -->
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="False" />
