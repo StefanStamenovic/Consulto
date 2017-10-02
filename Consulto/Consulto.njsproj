@@ -48,12 +48,24 @@
     <Compile Include="models\dbmodels\subject.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="models\viewmodels\index_vm.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="models\viewmodels\login_vm.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="models\viewmodels\signup_vm.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="models\viewmodels\viewmodel.js">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="public\lib\bootstrap.min.js" />
     <Compile Include="public\lib\jquery-3.2.1.min.js" />
     <Compile Include="public\lib\respond.min.js" />
+    <Compile Include="public\scripts\signup.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="routes\index.js" />
     <Compile Include="routes\login.js">
       <SubType>Code</SubType>

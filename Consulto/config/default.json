@@ -1,5 +1,7 @@
 ﻿{
   "config": {
+    "appname": "Consulto",
+    "hash": "3c55eff9da1193dd7f5056b1b0e7b0ff",
     "dbconfig": {
       "dbname": "consulto",
       "username": "root",

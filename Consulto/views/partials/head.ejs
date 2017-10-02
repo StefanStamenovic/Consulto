@@ -3,19 +3,22 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
-    <title><%= title %></title>
+    <script src="/lib/jquery-3.2.1.min.js"></script>
+    <title><%= model.title %></title>
 </head>
 <body>
-    <div class="navbar navbar-inverse navbar-default">
+    <div class="navbar navbar-inverse navbar-default" style="border-bottom-width: 2px;">
         <div class="container" style="padding-left: 0; padding-right: 0;">
             <div class="navbar-header">
-                <a class="navbar-brand" href="/"><%= title %></a>
+                <a class="navbar-brand" style="font-size: 40px" href="/"><%= model.appName %></a>
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav"></ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="/User/" style="font-size: 20px;">Profile</a></li>
-                    <li><a href="/User/Logout">Logout</a></li>
+                    <% if(model.isLoged) { %>
+                    <li><a href="/Profile/" style="font-size: 20px;">Profile</a></li>
+                    <li><a href="/logout">Odjava</a></li>
+                    <%}%>
                 </ul>
             </div>
         </div>

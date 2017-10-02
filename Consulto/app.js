@@ -37,13 +37,13 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 //Podesavanje sesije na 1 godinu
-app.use(session({ secret: 'keyboard cat', cookie: { expires: false, maxAge: (365 * 24 * 60 * 60 * 1000) } }))
+app.use(session({ secret: 'keyboard cat', cookie: { expires: false, maxAge: 365 * 24 * 60 * 60 * 1000 } }));
 
 //------------------------------------- Requister routes here -------------------------------------//
 
 app.use(index_route);
 app.use(login_route);
-app.use(signup_route)
+app.use(signup_route);
 
 //--------------------------------------------------------------------------//
 

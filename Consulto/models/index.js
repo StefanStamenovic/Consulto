@@ -22,7 +22,12 @@ fs.readdirSync(__dirname + '/dbmodels').filter(function (file) {
     });
 
 //Ukljucivanje view modela
-
+fs.readdirSync(__dirname + '/viewmodels').filter(function (file) {
+    return (file.indexOf(".") !== 0) && (file !== "viewmodel.js");
+}).forEach(function (file) {
+    var lmodel = require(path.join(__dirname + '/viewmodels/', file));
+    models.viewmodels[file.charAt(0).toUpperCase() + file.slice(1,-3).toLowerCase()] = lmodel;
+});
 //Veze
 //-----------------------------------------------------------------------------
 (function (m) {

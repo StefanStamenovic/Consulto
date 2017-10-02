@@ -1,10 +1,10 @@
 ﻿<% include ../partials/head %>
 <div class="row">
     <div class="col-md-2"></div>
-    <div class="col-md-8">
+    <div class="col-md-8" style="margin-bottom: 40px; margin-top: 22px;">
         <div class="jumbotron" style="padding-top: 0px;">
             <hr />
-            <h1 class="col-lg-offset-4" style="margin-top: 0px;">Log in</h1>
+            <h1 class="col-lg-offset-4" style="margin-top: 0px;">Prijava</h1>
             <hr style=" margin-bottom: 90px;" />
             <% if (null != null) { %>
             <div class="col-lg-offset-3">
@@ -14,7 +14,7 @@
                 </div>
             </div>
             <% } %>
-            <form class="form-horizontal col-lg-offset-3" action="/Login/Submit" method="get">
+            <form class="form-horizontal col-lg-offset-3" action="/login" method="post">
                 <fieldset>
                     <div class="form-group">
                         <div class="col-lg-10">
@@ -23,12 +23,12 @@
                     </div>
                     <div class="form-group" style="margin-bottom: 40px;">
                         <div class="col-lg-10">
-                            <input type="password" name="password" class="form-control" id="artist" placeholder="Password">
+                            <input type="password" name="password" class="form-control" id="artist" placeholder="Sifra">
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-md-10 col-lg-offset-1">
-                            <button type="submit" class="btn btn-primary" style="width: 50%;">Login</button>
+                            <button type="submit" class="btn btn-primary" style="width: 50%; font-size: 25px">Prijavi se</button>
                         </div>
                     </div>
                 </fieldset>
