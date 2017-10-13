@@ -14,7 +14,7 @@ router.get('/login', function (req, res) {
     if (req.session.isLoged)
     {
         vmodel.isLoged = req.session.isLoged;
-        res.redirect('/dashbord');
+        res.redirect('/dashboard');
     }
     else
         vmodel.isLoged = false;
@@ -22,22 +22,40 @@ router.get('/login', function (req, res) {
 });
 
 router.post('/login', function (req, res) {
-    var email = req.param('email');
-    var password = req.param('password');
+    var email = req.body.email;
+    var password = req.body.password;
     var hmac = crypto.createHmac('sha512', hash);
     hmac.update(password);
     var hashPassword = hmac.digest('hex');
-    models.dbmodels.Professor.findOne({ where: { email: email } }).then(professor => {
-        if (professor.password == hashPassword)
+    var storage = new models.Storage();
+
+    storage.findUserByEmail(email, function (user, user_type) {
+        if (user != null && user.password == hashPassword) {
             req.session.isLoged = true;
-        res.redirect('/');
+            req.session.user_type = user_type;
+            req.session.user = user;
+            user.update({ status: true }).then(() => {
+                res.redirect('/dashboard');
+            });
+        }
+        else
+            res.redirect('/login');
     });
-    
 });
 
 router.get('/logout', function (req, res) {
     req.session.isLoged = false;
-    res.redirect('/');
+    var storage = new models.Storage();
+
+    storage.findUserByEmail(req.session.user.email, function (user, user_type) {
+        if (user != null)
+            user.update({ status: false }).then(() => {
+                res.redirect('/');
+            });
+    });
+
+    req.session.user_type = undefined;
+    req.session.user = undefined;
 });
 
 module.exports = router;

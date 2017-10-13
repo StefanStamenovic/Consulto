@@ -1,10 +1,8 @@
 ﻿<% include ../partials/head %>
 <div class="row">
-    <div class="col-md-2"></div>
-    <div class="col-md-8" style="margin-bottom: 40px; margin-top: 22px;">
+    <div class="col-md-8 col-lg-offset-2" style="margin-bottom: 42px; margin-top: 40px;">
         <div class="jumbotron" style="padding-top: 0px;">
-            <hr />
-            <h1 class="col-lg-offset-4" style="margin-top: 0px;">Prijava</h1>
+            <h1 class="col-lg-offset-4" style="margin-top: 20px;">Prijava</h1>
             <hr style=" margin-bottom: 90px;" />
             <% if (null != null) { %>
             <div class="col-lg-offset-3">
@@ -18,7 +16,7 @@
                 <fieldset>
                     <div class="form-group">
                         <div class="col-lg-10">
-                            <input type="text" name="email" class="form-control" id="author" placeholder="Email">
+                            <input type="email" name="email" class="form-control" id="author" placeholder="Email">
                         </div>
                     </div>
                     <div class="form-group" style="margin-bottom: 40px;">

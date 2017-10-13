@@ -48,6 +48,12 @@
     <Compile Include="models\dbmodels\subject.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="models\viewmodels\chat_vm.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="models\viewmodels\dashboard_vm.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="models\viewmodels\index_vm.js">
       <SubType>Code</SubType>
     </Compile>
@@ -63,7 +69,22 @@
     <Compile Include="public\lib\bootstrap.min.js" />
     <Compile Include="public\lib\jquery-3.2.1.min.js" />
     <Compile Include="public\lib\respond.min.js" />
+    <Compile Include="public\scripts\dashboard.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="public\scripts\live.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="public\scripts\signup.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="routes\api.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="routes\chat.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="routes\dashboard.js">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="routes\index.js" />
@@ -71,6 +92,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="routes\signup.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="routes\test.js">
       <SubType>Code</SubType>
     </Compile>
     <Content Include="config\default.json">
@@ -93,9 +117,6 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="views\pages\login.ejs">
-      <SubType>Code</SubType>
-    </Content>
-    <Content Include="views\pages\profile.ejs">
       <SubType>Code</SubType>
     </Content>
     <Content Include="views\pages\signup.ejs">

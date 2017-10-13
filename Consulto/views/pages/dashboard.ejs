@@ -1,1 +1,393 @@
-﻿
+﻿<% include ../partials/head %>
+<% if(model.user_type == "professor"){%>
+    <div class="row">
+    <div class="col-md-8">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#consultview" data-toggle="tab" aria-expanded="true">Pregled konsultacija</a></li>
+            <li class=""><a href="#consulthistory" data-toggle="tab" aria-expanded="false">Istorija konsultacija</a></li>
+        </ul>
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="consultview">
+                <div class="panel-body" style="padding: 0px; padding-top: 20px; height: 74%">
+                    <div class="list-group" style="overflow:auto;height: 100%;padding-top: 1px;">
+                        <% model.userSubjects.forEach (function(subject){%>
+                            <a class="list-group-item h2 clearfix" data-toggle="collapse" data-target="#c<%= subject.id %>" style="margin-top:-1px"> <%= subject.name %>
+                                <div class="pull-right">
+                                    <span class="badge" style="margin-right: 10px; margin-top: 10px; background-color: rgb(251, 210, 117); color: white;font-size: 10px;">Novi zahtevi<span class="badge" id="notificationsCount" style="margin-left: 10px; background-color: white; color: rgb(251, 210, 117);font-size: 10px;">0</span></span>
+                                </div>
+                                <div class="pull-right">
+                                    <span class="badge" style="margin-right: 10px; margin-top: 10px; background-color: rgb(117, 202, 235); color: white;font-size: 10px;">Cekaju<span class="badge" id="notificationsCount" style="margin-left: 10px; background-color: white; color: rgb(117, 202, 235);font-size: 10px;">0</span></span>
+                                </div>
+                            </a>
+                            <div id="c<%= subject.id %>" class="collapse" style="background-color: whitesmoke;padding-bottom:1px">
+                                <div class="panel panel-primary" style=" margin-bottom: 0px;border-top-width: 5px;margin-left: 10px;margin-right: 10px;">
+                                    <div class="panel-heading" style="background-color: rgb(117, 202, 235);">
+                                        <h3 class="panel-title">Zahtevi za konsultaciju</h3>
+                                    </div>
+                                    <div class="panel-body" style="padding: 0px;">
+                                        <ul class="list-group">
+                                            <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
+                                                <label class="pull-left">
+                                                    <input type="checkbox" style="width: 15px;height: 15px;">
+                                                </label>
+                                                <p class="pull-left" style="margin-left: 10px;margin-bottom:auto">Ime i prezime</p>
+                                                <p class="pull-left" style="margin-left: 50px;margin-bottom:auto">Tema</p>
+                                                <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Odbij zahtev</a>
+                                                <p class="pull-right" style="margin-right: 10px;margin-bottom:auto">d/m/y h/m</p>
+                                            </li>
+                                        </ul>
+                                        <div class="clearfix" style="margin: 5px">
+                                            <button type="submit" class="btn btn-default pull-right">Zakazite konsultaciju</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel panel-info" style="margin:10px;">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Konsultacije spremne za pocetak</h3>
+                                    </div>
+                                    <div class="panel-body" style="padding: 0px;">
+                                        <ul class="list-group">
+                                            <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
+                                                <div class="col-lg-12">
+                                                    <h4 style="margin-bottom:auto">Tema</h4>
+                                                </div>
+                                                <p class="pull-left" style="margin-left: 10px;margin-bottom:auto">Vreme pocetka: d/m/y h/m</p>
+                                                <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Pocni konsultaciju</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        <%});%>
+                        <% if(model.userSubjects.length < 1){ %>
+                            <h4 class="text-muted" style="text-align:center;">Nemate predmeta za prikaz.</h4>
+                        <%}%>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="consulthistory">
+                <div class="panel-body" style="padding: 0px; padding-top: 20px; height: 74%">
+                    <div class="list-group" style="overflow:auto;height: 100%;padding-top: 1px;">
+                        <% model.userSubjects.forEach (function(subject){%>
+                        <a class="list-group-item h2 clearfix" data-toggle="collapse" data-target="#<%= subject.id %>" style="margin-top:-1px"> <%= subject.name %> </a>
+                        <div id="<%= subject.id %>" class="collapse">
+                            <div class="list-group-item" style="background-color:#fafafa; padding:0px">
+                                <ul class="list-group">
+                                    <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
+                                        <div class="col-lg-12">
+                                            <h4 style="margin-bottom:auto">Tema</h4>
+                                        </div>
+                                        <p class="pull-left" style="margin-left: 10px;margin-bottom:auto">Vreme pocetka: d/m/y h/m</p>
+                                        <p class="pull-left" style="margin-left: 200px;margin-bottom:auto">Vreme kraja: d/m/y h/m</p>
+                                        <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Pogledaj konsultaciju</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <%});%>
+                        <% if(model.userSubjects.length < 1){ %>
+                        <h4 class="text-muted" style="text-align:center;">Nemate istoriju konsultacija za prikaz</h4>
+                        <%}%>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">     
+        <div class="panel panel-info">
+            <div class="panel-heading">Predmeti<a class="btn btn-primary btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="#addSubject">Dodajte novi predmet</a></div>
+            <div class="panel-body" style="overflow:auto;height: 35%;padding: 0px;">
+                <ul class="list-group">
+                    <% model.userSubjects.forEach(function(subject){%>
+                        <li class="list-group-item clearfix">
+                            <div class="col-lg-12 clearfix" style="margin-bottom:10px;padding: 0px">
+                                <h4 class="pull-left" style="margin-bottom:auto"><%= subject.name%></h4>
+                            </div>
+                            <p class="pull-left" style="margin-left: 10px">Na <strong><% switch(subject.year){ case 1 :%>prvoj<%break;case 2:%>drugoj<%break;case 3:%>trecoj<%break;case 4:%>cetvrtoj<%break;case 5:%>petoj<%break;case 6:%>sestoj<%break;}%></strong> godini</p>
+                            <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Ugasi</a>
+                            <a class="btn btn-default btn-lg pull-right" style="padding: 3px;margin-right: 10px" data-toggle="modal" href="">Izmeni</a>
+                        </li>
+                    <%});%>
+                </ul>
+                <% if (model.userSubjects.length < 1) {%>
+                    <h4 class="text-muted" style="text-align:center">Ne drzite ni jedan predmet.</h4>
+                <%}%>
+            </div>
+        </div>
+        <div class="panel panel-info">
+            <div class="panel-heading">Konsultacije spremne za pocetak</div>
+            <div class="panel-body" style="overflow:auto;height: 28%;padding: 0px;">
+                <div class="list-group-item" style="background-color:#fafafa; padding:0px">
+                    <ul class="list-group">
+                        <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px;padding-bottom: 0px;padding-top: 0px">
+                            <div class="col-lg-12 clearfix" style="margin-bottom:10px;padding: 0px">
+                                <h4 class="pull-left" style="margin-bottom:auto">Tema</h4>
+                            </div>
+                            <p class="pull-left" style="margin-left: 10px">Predmet</p>
+                            <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Pocni konsultaciju</a>
+                        </li>
+                    </ul>
+                </div>
+             </div>
+        </div>
+    </div>
+
+    <div class="modal" id="addSubject">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Krejiranje predmeta</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" action="/subject/create" method="post">
+                        <fieldset>
+                            <div class="form-group">
+                                <div class="row"  style="margin-bottom: 10px">
+                                    <label class="col-lg-4 control-label">Ime predmeta:</label>
+                                    <div class="col-lg-6">
+                                        <input type="text" class="form-control" name="name" placeholder="Ime predmeta">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <label class="col-lg-4 control-label">Godina:</label>
+                                    <div class="col-lg-2">
+                                        <select class="form-control" name="year">
+                                            <% for(var i = 1; i < 6;i++){%>
+                                            <option><%= i %></option>
+                                            <%}%>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-lg-10 col-lg-offset-2">
+                                    <button type="submit" class="btn btn-primary pull-right">Krejirajte predmet</button>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<%} else if(model.user_type == "student"){%>
+    <div class="row">
+    <div class="col-md-8">
+        <ul class="nav nav-tabs">
+            <li class="active"><a href="#consultview" data-toggle="tab" aria-expanded="true">Pregled predmeta</a></li>
+            <li class=""><a href="#consulthistory" data-toggle="tab" aria-expanded="false">Istorija konsultacija</a></li>
+        </ul>
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="consultview">
+                <div class="panel-body" style="padding: 0px; padding-top: 20px; height: 74%">
+                    <div class="list-group" style="overflow:auto;height: 100%;padding-top: 1px;">
+                        <% model.userSubjects.forEach (function(subject){%>
+                            <a class="list-group-item h2 clearfix" data-toggle="collapse" data-target="#c<%= subject.id %>" style="margin-top:-1px">
+                                <%= subject.name %>
+                                <div class="pull-right">
+                                    <span class="badge" style="margin-right: 10px; margin-top: 10px; background-color: rgb(251, 210, 117); color: white;font-size: 10px;">Novi zahtevi<span class="badge" id="notificationsCount" style="margin-left: 10px; background-color: white; color: rgb(251, 210, 117);font-size: 10px;">0</span></span>
+                                </div>
+                                <div class="pull-right">
+                                    <span class="badge" style="margin-right: 10px; margin-top: 10px; background-color: rgb(117, 202, 235); color: white;font-size: 10px;">Cekaju<span class="badge" id="notificationsCount" style="margin-left: 10px; background-color: white; color: rgb(117, 202, 235);font-size: 10px;">0</span></span>
+                                </div>
+                            </a>
+                            <div id="c<%= subject.id %>" class="collapse" style="background-color: whitesmoke;padding-bottom:1px">
+                                <div class="panel panel-default" style=" margin-bottom: 0px;border-top-width: 5px;margin-left: 10px;margin-right: 10px;">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Profesor: <strong><%= subject.PROFESSOR.name%></strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Godina: <strong><% switch(subject.year){ case 1 :%>prva<%break;case 2:%>druga<%break;case 3:%>treca<%break;case 4:%>cetvrta<%break;case 5:%>peta<%break;case 6:%>sesta<%break;}%></strong></h3>
+                                    </div>
+                                    <div class="panel-body" style="padding: 0px;">
+                                    </div>
+                                </div>
+                                <div class="panel panel-primary" style=" margin-bottom: 0px;border-top-width: 5px;margin-left: 10px;margin-right: 10px;">
+                                    <div class="panel-heading" style="background-color: rgb(117, 202, 235);">
+                                        <h3 class="panel-title">Zahtevi za konsultaciju</h3>
+                                    </div>
+                                    <div class="panel-body" style="padding: 0px;">
+                                        <ul class="list-group">
+                                            <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
+                                                <p class="pull-left" style="margin-left: 10px;margin-bottom:auto">Status</p>
+                                                <p class="pull-left" style="margin-left: 50px;margin-bottom:auto">Tema</p>
+                                                <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Obrisi zahtev</a>
+                                                <p class="pull-right" style="margin-right: 10px;margin-bottom:auto">d/m/y h/m</p>
+                                            </li>
+                                        </ul>
+                                        <div class="clearfix" style="margin: 5px">
+                                            <button type="submit" class="btn btn-default pull-right requestButton" value="<%= subject.id%>">Zahtevaj konsultaciju</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="panel panel-info" style="margin:10px;">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Konsultacije u toku</h3>
+                                    </div>
+                                    <div class="panel-body" style="padding: 0px;">
+                                        <ul class="list-group">
+                                            <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
+                                                <div class="col-lg-12">
+                                                    <h4 style="margin-bottom:auto">Tema</h4>
+                                                </div>
+                                                <p class="pull-left" style="margin-left: 10px;margin-bottom:auto">Vreme pocetka: d/m/y h/m</p>
+                                                <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Pridruzi se</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        <%});%>
+                        <% if(model.userSubjects.length < 1){ %>
+                        <h4 class="text-muted" style="text-align:center;">Nemate predmeta za prikaz.</h4>
+                        <%}%>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="consulthistory">
+                <div class="panel-body" style="padding: 0px; padding-top: 20px; height: 74%">
+                    <div class="list-group" style="overflow:auto;height: 100%;padding-top: 1px;">
+                        <% model.userSubjects.forEach (function(subject){%>
+                            <a class="list-group-item h2 clearfix" data-toggle="collapse" data-target="#<%= subject.id %>" style="margin-top:-1px"> <%= subject.name %> </a>
+                            <div id="<%= subject.id %>" class="collapse">
+                                <div class="list-group-item" style="background-color:#fafafa; padding:0px">
+                                    <ul class="list-group">
+                                        <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
+                                            <div class="col-lg-12">
+                                                <h4 style="margin-bottom:auto">Tema</h4>
+                                            </div>
+                                            <p class="pull-left" style="margin-left: 10px;margin-bottom:auto">Vreme pocetka: d/m/y h/m</p>
+                                            <p class="pull-left" style="margin-left: 200px;margin-bottom:auto">Vreme kraja: d/m/y h/m</p>
+                                            <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Pogledaj konsultaciju</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        <%});%>
+                        <% if(model.userSubjects.length < 1){ %>
+                        <h4 class="text-muted" style="text-align:center;">Nemate istoriju konsultacija za prikaz</h4>
+                        <%}%>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-info">
+            <div class="panel-heading">Predmeti<a class="btn btn-primary btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="#addSubject">Prijavite se na predmet</a></div>
+            <div class="panel-body" style="overflow:auto;height: 33%;padding: 0px;">
+                <ul class="list-group">
+                    <% model.userSubjects.forEach(function(subject){%>
+                    <li class="list-group-item clearfix">
+                        <div class="col-lg-12 clearfix" style="margin-bottom:10px;padding: 0px">
+                            <h4 class="pull-left" style="margin-bottom:auto"><%= subject.name%></h4>
+                        </div>
+                        <p class="pull-left" style="margin-left: 10px"> </p>
+                        <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Odjavi</a>
+                    </li>
+                    <%});%>
+                </ul>
+                <% if (model.userSubjects.length < 1) {%>
+                <h4 class="text-muted" style="text-align:center">Niste prijavljeni ni na jedan predmet.</h4>
+                <%}%>
+            </div>
+        </div>
+        <div class="panel panel-info">
+            <div class="panel-heading">Konsultacije koje su trenutno u toku</div>
+            <div class="panel-body" style="overflow:auto;height: 28%;padding: 0px;">
+                <div class="list-group-item" style="background-color:#fafafa; padding:0px">
+                    <ul class="list-group">
+                        <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px;padding-bottom: 0px;padding-top: 0px">
+                            <div class="col-lg-12 clearfix" style="margin-bottom:10px;padding: 0px">
+                                <h4 class="pull-left" style="margin-bottom:auto">Tema</h4>
+                            </div>
+                            <p class="pull-left" style="margin-left: 10px">Predmet</p>
+                            <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Pridruzi se</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="addSubject">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Prijava na predmet</h4>
+                </div>
+                <%var contains = false;%>
+                <%var contains1 = false;%>
+                <% model.allSubjects.forEach(function(subject){ if(subject.year == model.user.year && model.userSubjects.filter(fsubject => {return fsubject.id == subject.id}).length == 0) contains = true;});%>
+                <% model.allSubjects.forEach(function(subject){ if(subject.year != model.user.year && model.userSubjects.filter(fsubject => {return fsubject.id == subject.id}).length == 0) contains1 = true;});%>
+                <div class="modal-body">
+                <%if(contains == true || contains1 == true){%>
+                    <% if(contains == true){%>
+                    <form class="form-horizontal" action="/subject/select" method="post">
+                        <fieldset>
+                            <div class="form-group">
+                                <div class="row" style="margin-bottom: 10px">
+                                    <label for="select" class="col-lg-4 control-label">Predmeti na <%= %> godini:</label>
+                                    <div class="col-lg-6">
+                                        <select class="form-control" id="select" name="subject">
+                                            <% model.allSubjects.forEach(function(subject){%>
+                                            <% if(subject.year == model.user.year && model.userSubjects.filter(fsubject => {return fsubject.id == subject.id}).length == 0){%>
+                                            <option value="<%= subject.id%>"><%= subject.name %></option>
+                                            <%}});%>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-lg-10 col-lg-offset-2">
+                                    <button type="submit" class="btn btn-primary pull-right">Prijavite se na predmet</button>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                    <%}%>
+                    <% if(contains1 == true){%>
+                    <form class="form-horizontal" action="/subject/select" method="post">
+                        <fieldset>
+                            <div class="form-group">
+                                <div class="row">
+                                    <label class="col-lg-4 control-label">Ostali predmeti:</label>
+                                    <div class="col-lg-6">
+                                        <select class="form-control" name="subject">
+                                            <% model.allSubjects.forEach(function(subject){%>
+                                            <% if(subject.year != model.user.year && model.userSubjects.filter(fsubject => {return fsubject.id == subject.id}).length == 0){%>
+                                            <option value="<%= subject.id%>"><%= subject.name %></option>
+                                            <%}});%>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-lg-10 col-lg-offset-2">
+                                    <button type="submit" class="btn btn-primary pull-right">Prijavite se na predmet</button>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                    <%}%>
+                <%}else{%>
+                    <h4 class="text-muted" style="text-align:center">Nema vise predmeta za prijavu.</h4>
+                <%}%>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="makeRequest">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Zahtev za konsultaciju</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+<%}%>
+<script src="/scripts/dashboard.js"></script>
+<% include ../partials/footer %>

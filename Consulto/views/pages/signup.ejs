@@ -11,38 +11,40 @@
             </div>
         </div>
     </div>
-    <div id="signup-student" class="col-md-8 col-lg-offset-2" style="display: none;">
-        <div class="jumbotron" style="padding-top: 0px;">
-            <h1 style="margin-top: 10px; text-align:center">Registracija</h1>
-            <hr style=" margin-bottom: 100px;" />
-            <% if (null != null) { %>
-            <div class="col-lg-offset-3">
-                <div class="alert alert-dismissible alert-danger" style="width: 60%; margin-top: -74px;">
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    <strong><%= error %></strong>
-                </div>
-            </div>
-            <% } %>
+    <div id="signup-student" class="col-md-8 col-lg-offset-2" style="display: none;margin-bottom: -21px;">
+        <div class="jumbotron" style="padding-top: 0px;padding-bottom: 10px">
+            <h1 style="margin-top: 20px; text-align:center">Registracija</h1>
+            <hr style=" margin-bottom: 20px;" />
             <form class="form-horizontal col-lg-offset-3" action="/signup" method="post">
                 <fieldset>
                     <div class="form-group">
                         <div class="col-lg-10">
-                            <input type="text" name="name" class="form-control" id="author" placeholder="Ime i prezime">
+                            <input type="text" name="name" class="form-control" placeholder="Ime i prezime">
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-10">
-                            <input type="text" name="email" class="form-control" id="author" placeholder="Email">
+                            <input type="email" name="email" class="form-control" placeholder="Email">
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-10">
-                            <input type="password" name="password" class="form-control" id="artist" placeholder="Sifra">
+                            <input type="password" name="password" class="form-control" placeholder="Sifra">
                         </div>
                     </div>
                     <div class="form-group" style="margin-bottom: 40px;">
                         <div class="col-lg-10">
-                            <input type="password" name="confirm" class="form-control" id="artist" placeholder="Potvrdi sifru">
+                            <input type="password" name="confirm" class="form-control" placeholder="Potvrdi sifru">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-10">
+                            <input type="number" name="index" class="form-control" placeholder="Broj indeksa">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-10">
+                            <input type="number" name="year" class="form-control" placeholder="Godina studija">
                         </div>
                     </div>
                     <input type="hidden" name="user" value="student">
@@ -55,18 +57,10 @@
             </form>
         </div>
     </div>
-    <div id="signup-professor" class="col-md-8 col-lg-offset-2" style="display: none;">
-        <div class="jumbotron" style="padding-top: 0px;">
-            <h1 style="margin-top: 10px; text-align:center">Registracija</h1>
-            <hr style=" margin-bottom: 100px;" />
-            <% if (null != null) { %>
-            <div class="col-lg-offset-3">
-                <div class="alert alert-dismissible alert-danger" style="width: 60%; margin-top: -74px;">
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    <strong><%= error %></strong>
-                </div>
-            </div>
-            <% } %>
+    <div id="signup-professor" class="col-md-8 col-lg-offset-2" style="display: none; margin-bottom: 6px; margin-top: 40px;" >
+        <div class="jumbotron" style="padding-top: 0px">
+            <h1 style="margin-top: 20px; text-align:center">Registracija</h1>
+            <hr style=" margin-bottom: 20px;" />
             <form class="form-horizontal col-lg-offset-3" action="/signup" method="post">
                 <fieldset>
                     <div class="form-group">
@@ -76,7 +70,7 @@
                     </div>
                     <div class="form-group">
                         <div class="col-lg-10">
-                            <input type="text" name="email" class="form-control" id="author" placeholder="Email">
+                            <input type="email" name="email" class="form-control" id="author" placeholder="Email">
                         </div>
                     </div>
                     <div class="form-group">

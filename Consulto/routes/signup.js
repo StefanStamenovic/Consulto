@@ -14,7 +14,7 @@ router.get('/signup', function (req, res) {
     if (req.session.isLoged)
     {
         vmodel.isLoged = req.session.isLoged;
-        res.redirect('/dashbord');
+        res.redirect('/dashboard');
     }
     else
         vmodel.isLoged = false;
@@ -22,17 +22,21 @@ router.get('/signup', function (req, res) {
 });
 
 router.post('/signup', function (req, res) {
-    var name = req.param('name');
-    var email = req.param('email');
-    var password = req.param('password');
-    var user = req.param('user');
+    //Parametri
+    var name = req.body.name;
+    var email = req.body.email;
+    var password = req.body.password;
+    var user_type = req.body.user;
+    var index = req.body.index;
+    var year = req.body.year;
+
+    //Hesiranje sifre
     var hmac = crypto.createHmac('sha512', hash);
     hmac.update(password);
     var hashPassword = hmac.digest('hex');
-    if (user == "professor")
-        models.dbmodels.Professor.create({ name: name, email: email, password: hashPassword });
-    else if (user == "student")
-        models.dbmodels.Student.create({ name: name, email: email, password: hashPassword });
+
+    var storage = new models.Storage();
+    storage.createUser(user_type, name, email, hashPassword, index, year);
     res.redirect('/');
 });
 

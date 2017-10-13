@@ -1,7 +1,9 @@
 ﻿    <hr />
-    <footer>
-        <p>Napravio Stefan Stamenovic ©2017</p>
-    </footer>
+    <% if(model.footer == null) {%>
+        <footer>
+            <p>Napravio Stefan Stamenovic ©2017</p>
+        </footer>
+    <%}%>
     </div>
     <script src="/lib/bootstrap.min.js"></script>
     <script src="/lib/respond.min.js"></script>
