@@ -18,15 +18,68 @@ router.get('/dashboard', function (req, res) {
     if (req.session.user_type == "professor") {
         storage.findProfessorSubjects(req.session.user, function (subjects) {
             vmodel.userSubjects = subjects;
-            res.render('./pages/dashboard', { model: vmodel });
+
+            //Pronalazim sve zahtve za predmete
+            var promises = [];
+            //Nalzim zahteve ako postoje za svaki od predmeta
+            vmodel.userSubjects.forEach(subject => {
+                promises.push(new Promise((resolve, reject) => {
+                    storage.findSubjectConsultRequests(subject, request => {
+                        subject.request = request;
+                        resolve(request);
+                    });
+                }));
+            });
+            Promise.all(promises).then(requests => {
+                promises = [];
+                vmodel.userSubjects.forEach(subject => {
+                    promises.push(new Promise((resolve, reject) => {
+                        storage.findSubjectConsults(subject, consults => {
+                            subject.consults = consults;
+                            resolve(consults);
+                        });
+                    }));
+                });
+                Promise.all(promises).then(consults => {
+                    res.render('./pages/dashboard', { model: vmodel });
+                });
+            });
         });
     }
     else if (req.session.user_type == 'student') {
-        storage.findAllSubjects(function (subjects) {
-            vmodel.allSubjects = subjects;
-            storage.findStudentSubjects(req.session.user, function (usubjects) {
-                vmodel.userSubjects = usubjects;
-                res.render('./pages/dashboard', { model: vmodel });
+
+        //Pronalazim sve predmete za potrebe izbora novog predmeta 
+        storage.findAllSubjects(function (allsubjects) {
+            vmodel.allSubjects = allsubjects;
+
+            //Pronalazim sve predmete kojima student prisustvuje
+            storage.findStudentSubjects(req.session.user, function (subjects) {
+                vmodel.userSubjects = subjects;
+
+                var promises = [];
+                //Nalzim zahteve ako postoje za svaki od predmeta
+                vmodel.userSubjects.forEach(subject => {
+                    promises.push(new Promise((resolve, reject) => {
+                        storage.findStudentConsultRequest(req.session.user, subject.id, request => {
+                            subject.request = request;
+                            resolve(request);
+                        });
+                    }));
+                });
+                Promise.all(promises).then(requests => {
+                    promises = [];
+                    vmodel.userSubjects.forEach(subject => {
+                        promises.push(new Promise((resolve, reject) => {
+                            storage.findSubjectConsults(subject, consults => {
+                                subject.consults = consults;
+                                resolve(consults);
+                            });
+                        }));
+                    });
+                    Promise.all(promises).then(consults => {
+                        res.render('./pages/dashboard', { model: vmodel });
+                    });
+                });
             });
         });
     }

@@ -2,6 +2,7 @@
   "config": {
     "appname": "Consulto",
     "hash": "3c55eff9da1193dd7f5056b1b0e7b0ff",
+    "key":"ciw7p02f70000ysjon7gztjn7",
     "dbconfig": {
       "dbname": "consulto",
       "username": "root",

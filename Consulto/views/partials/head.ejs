@@ -13,9 +13,22 @@
                 <a class="navbar-brand" style="font-size: 40px" href="/"><%= model.appName %></a>
             </div>
             <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav"></ul>
                 <ul class="nav navbar-nav navbar-right">
                     <% if(model.isLoged) { %>
+                        <%if(model.user != null){%>
+                            <li style="height: 50px;padding:15px">
+                                <div style="padding: 10px;background-color: #f5f5f5;margin-top: -10px;border-radius: 20px;font-size: 12px;">
+                                    <strong><%if(model.user_type == 'professor'){%>Profesor<%}else{%>Student<%}%></strong>
+                                    <%if(model.user_type == 'student'){%>
+                                        <p class="pull-right" style="margin-left:5px"><%=model.user.year%></p>
+                                        <strong class="pull-right" style="margin-left:5px">Godina:</strong>
+                                        <p class="pull-right" style="margin-left:5px"><%=model.user.index%></p>
+                                        <strong class="pull-right" style="margin-left:5px">Index:</strong>
+                                    <%}%>
+                                    <p class="pull-right" style="margin-left:5px"><%=model.user.name%></p>
+                                </div>
+                            </li>
+                        <%}%>
                     <li><a href="/dashboard" style="font-size: 20px;">Dashboard</a></li>
                     <li><a href="/logout">Odjava</a></li>
                     <%}%>

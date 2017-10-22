@@ -8,25 +8,13 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 
-//Ucitavanje modela
+//------------------------------------- Ukljucivanje definicija sequelize orm modela kao i inicijalizacija storagea -------------------------------------//
 var models = require('./models');
 models.sequelize.sync();
-
-//------------------------------------- Requre for routes -------------------------------------//
-
-var index_route = require('./routes/index');
-var login_route = require('./routes/login');
-var signup_route = require('./routes/signup');
-var dashboard_route = require('./routes/dashboard');
-var chat_route = require('./routes/chat');
-
-//--------------------------------------------------------------------------//
-
-
-
+//------------------------------------- Podesavanje i postavljanje aplikacije kao express aplikacija -------------------------------------//
 var app = express();
 
-// view engine setup
+//Ukljucivanje stranica za prikaz
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
@@ -41,7 +29,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 //Podesavanje sesije na 1 godinu
 app.use(session({ secret: 'keyboard cat', cookie: { expires: false, maxAge: 365 * 24 * 60 * 60 * 1000 } }));
 
-//------------------------------------- Requister routes here -------------------------------------//
+//------------------------------------- Registracija ruta aplikacije i apija -------------------------------------//
+var index_route = require('./routes/index');
+var login_route = require('./routes/login');
+var signup_route = require('./routes/signup');
+var dashboard_route = require('./routes/dashboard');
+var chat_route = require('./routes/chat');
 
 app.use(index_route);
 app.use(login_route);
@@ -55,19 +48,14 @@ var api_routes= require('./routes/api');
 api_routes.forEach(function (route) {
     app.use(route);
 });
-//--------------------------------------------------------------------------//
-
-// catch 404 and forward to error handler
+//------------------------------------- Rukovodjenje greskama -------------------------------------//
+//Prijava Not Found greske
 app.use(function (req, res, next) {
     var err = new Error('Not Found');
     err.status = 404;
     next(err);
 });
-
-// error handlers
-
-// development error handler
-// will print stacktrace
+//Prijava gresaka tokom razvoja
 if (app.get('env') === 'development') {
     app.use(function (err, req, res, next) {
         res.status(err.status || 500);
@@ -77,9 +65,7 @@ if (app.get('env') === 'development') {
         });
     });
 }
-
-// production error handler
-// no stacktraces leaked to user
+//Prijava gresaka na serveru
 app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.render('error', {
@@ -88,20 +74,12 @@ app.use(function (err, req, res, next) {
     });
 });
 
+//------------------------------------- Pokretanje servera i socket.io-------------------------------------//
+//Pokretanje servera
 app.set('port', process.env.PORT || 3000);
-
 var server = app.listen(app.get('port'), function () {
     debug('Express server listening on port ' + server.address().port);
 });
 
-var io = require('socket.io')(server);
-io.on('connection', function (socket) {
-    console.log('a user connected');
-    socket.on('chat message', function (msg) {
-        console.log('message: ' + msg);
-        io.emit('chat message', msg);
-    });
-    socket.on('disconnect', function () {
-        console.log('user disconnected');
-    });
-});
+//Ukjucivanje socket.io za rad sa realtime komunikacijom
+var realtime = require('./realtime/realtime')(server);

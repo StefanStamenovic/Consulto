@@ -69,10 +69,13 @@
     <Compile Include="public\lib\bootstrap.min.js" />
     <Compile Include="public\lib\jquery-3.2.1.min.js" />
     <Compile Include="public\lib\respond.min.js" />
+    <Compile Include="public\scripts\chat.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="public\scripts\dashboard.js">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="public\scripts\live.js">
+    <Compile Include="realtime\realtime.js">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="public\scripts\signup.js">
@@ -101,6 +104,8 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="package.json" />
+    <Content Include="public\images\file.png" />
+    <Content Include="public\images\image.png" />
     <Content Include="public\stylesheets\bootstrap.min.css" />
     <Content Include="public\stylesheets\main.css" />
     <Content Include="README.md" />
@@ -134,6 +139,8 @@
     <Folder Include="models\dbmodels\" />
     <Folder Include="models\viewmodels\" />
     <Folder Include="config\" />
+    <Folder Include="uploads\" />
+    <Folder Include="realtime\" />
     <Folder Include="public\" />
     <Folder Include="public\images\" />
     <Folder Include="public\lib\" />

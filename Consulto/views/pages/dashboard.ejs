@@ -1,63 +1,89 @@
 ﻿<% include ../partials/head %>
 <% if(model.user_type == "professor"){%>
     <div class="row">
+    <!--Levi panel-->
     <div class="col-md-8">
         <ul class="nav nav-tabs">
             <li class="active"><a href="#consultview" data-toggle="tab" aria-expanded="true">Pregled konsultacija</a></li>
             <li class=""><a href="#consulthistory" data-toggle="tab" aria-expanded="false">Istorija konsultacija</a></li>
         </ul>
         <div id="myTabContent" class="tab-content">
+            <!--Panel za konsultacije-->
             <div class="tab-pane fade active in" id="consultview">
                 <div class="panel-body" style="padding: 0px; padding-top: 20px; height: 74%">
                     <div class="list-group" style="overflow:auto;height: 100%;padding-top: 1px;">
                         <% model.userSubjects.forEach (function(subject){%>
-                            <a class="list-group-item h2 clearfix" data-toggle="collapse" data-target="#c<%= subject.id %>" style="margin-top:-1px"> <%= subject.name %>
-                                <div class="pull-right">
-                                    <span class="badge" style="margin-right: 10px; margin-top: 10px; background-color: rgb(251, 210, 117); color: white;font-size: 10px;">Novi zahtevi<span class="badge" id="notificationsCount" style="margin-left: 10px; background-color: white; color: rgb(251, 210, 117);font-size: 10px;">0</span></span>
-                                </div>
-                                <div class="pull-right">
-                                    <span class="badge" style="margin-right: 10px; margin-top: 10px; background-color: rgb(117, 202, 235); color: white;font-size: 10px;">Cekaju<span class="badge" id="notificationsCount" style="margin-left: 10px; background-color: white; color: rgb(117, 202, 235);font-size: 10px;">0</span></span>
-                                </div>
+                            <%if(subject.status == true){%>
+                                <%var rcount = 0; subject.request.forEach(request => { if(request.status == 'notApproved'){ rcount++;}});%>
+                                <%var ccount = 0; subject.consults.forEach(consult => { if(consult.e_time == null){ ccount++;}});%>
+                                <a class="list-group-item h2 clearfix" data-toggle="collapse" data-target="#c<%= subject.id %>" style="margin-top:-1px"> <%= subject.name %>
+                                <%if(rcount > 0){%>
+                                    <div class="pull-right">
+                                        <span class="badge" style="margin-right: 10px; margin-top: 10px; background-color: rgb(251, 210, 117); color: white;font-size: 10px;">Zahtevi<span class="badge" id="notificationsCount" style="margin-left: 10px; background-color: white; color: rgb(251, 210, 117);font-size: 10px;"><%= rcount%></span></span>
+                                    </div>
+                                <%}%>
+                                <%if(ccount > 0){%>
+                                    <div class="pull-right">
+                                        <span class="badge" style="margin-right: 10px; margin-top: 10px; background-color: rgb(117, 202, 235); color: white;font-size: 10px;">Konsultacije<span class="badge" id="notificationsCount" style="margin-left: 10px; background-color: white; color: rgb(117, 202, 235);font-size: 10px;"><%= ccount%></span></span>
+                                    </div>
+                                <%}%>
                             </a>
-                            <div id="c<%= subject.id %>" class="collapse" style="background-color: whitesmoke;padding-bottom:1px">
+                                 <div id="c<%= subject.id %>" class="collapse" style="background-color: whitesmoke;padding-bottom:1px">
                                 <div class="panel panel-primary" style=" margin-bottom: 0px;border-top-width: 5px;margin-left: 10px;margin-right: 10px;">
                                     <div class="panel-heading" style="background-color: rgb(117, 202, 235);">
                                         <h3 class="panel-title">Zahtevi za konsultaciju</h3>
                                     </div>
                                     <div class="panel-body" style="padding: 0px;">
+                                        <%var rcount = 0; subject.request.forEach(request => { if(request.status == 'notApproved'){ rcount++;}});%>
+                                        <% if(rcount > 0){%>
                                         <ul class="list-group">
-                                            <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
-                                                <label class="pull-left">
-                                                    <input type="checkbox" style="width: 15px;height: 15px;">
-                                                </label>
-                                                <p class="pull-left" style="margin-left: 10px;margin-bottom:auto">Ime i prezime</p>
-                                                <p class="pull-left" style="margin-left: 50px;margin-bottom:auto">Tema</p>
-                                                <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Odbij zahtev</a>
-                                                <p class="pull-right" style="margin-right: 10px;margin-bottom:auto">d/m/y h/m</p>
-                                            </li>
+                                            <%subject.request.forEach(request => {%>
+                                                <%if(request.status == 'notApproved'){%>
+                                                    <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
+                                                        <p class="pull-left" style="margin-left: 10px;margin-bottom:auto"><%= request.student.name%></p>
+                                                        <p class="pull-left" style="margin-left: 50px;margin-bottom:auto"><%= request.subject%></p>
+                                                        <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Zakazi</a>
+                                                        <a class="btn btn-default btn-lg pull-right" style="margin-right: 10px;padding: 3px;" data-toggle="modal" href="">Odbij zahtev</a>
+                                                        <p class="pull-right" style="margin-right: 10px;margin-bottom:auto"><strong><%= request.time.getUTCDate() + "/" + (request.time.getUTCMonth()+1) + "/" + request.time.getUTCFullYear()%></strong></p>
+                                                    </li>
+                                                <%}%>
+                                            <%});%>
                                         </ul>
+                                        <%}else{%>
+                                        <h4 class="text-muted" style="text-align:center;">Nemate zahteva za konsultaciju.</h4>
+                                        <%}%>
                                         <div class="clearfix" style="margin: 5px">
-                                            <button type="submit" class="btn btn-default pull-right">Zakazite konsultaciju</button>
+                                            <button type="submit" class="btn btn-default pull-right consult_create" value="<%=subject.id%>">Zakazite ne zahtevanu konsultaciju</button>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="panel panel-info" style="margin:10px;">
                                     <div class="panel-heading">
-                                        <h3 class="panel-title">Konsultacije spremne za pocetak</h3>
+                                        <h3 class="panel-title">Konsultacije</h3>
                                     </div>
                                     <div class="panel-body" style="padding: 0px;">
+                                        <%var tcount = 0; subject.consults.forEach(consult => { if(consult.e_time == null){ tcount++;}});%>
+                                        <% if(tcount > 0){%>
                                         <ul class="list-group">
+                                            <%subject.consults.forEach(consult => {%>
                                             <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
                                                 <div class="col-lg-12">
-                                                    <h4 style="margin-bottom:auto">Tema</h4>
+                                                    <h4 style="margin-bottom:auto">Tema: <strong><%= consult.subject%></strong></h4>
                                                 </div>
-                                                <p class="pull-left" style="margin-left: 10px;margin-bottom:auto">Vreme pocetka: d/m/y h/m</p>
-                                                <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Pocni konsultaciju</a>
+                                                <p class="pull-left" style="margin-left: 20px;margin-top:10px">Vreme pocetka: <strong><%= consult.sc_time.getUTCHours() + ":" + consult.sc_time.getUTCMinutes() + " " + consult.sc_time.getUTCDate() + "/" + (consult.sc_time.getUTCMonth()+1) + "/" + consult.sc_time.getUTCFullYear()%></strong></p>
+                                                <%if(consult.sc_time < (new Date()) && consult.status == false) {%>
+                                                    <a class="btn btn-default btn-lg pull-right start_button" style="padding: 3px;" data-toggle="modal" href="" value="<%=consult.id%>">Pocni konsultaciju</a>
+                                                <%}%>
                                             </li>
+                                            <%});%>
                                         </ul>
+                                        <%}else{%>
+                                        <h4 class="text-muted" style="text-align:center;">Nema konsultacija.</h4>
+                                        <%}%>
                                     </div>
                                 </div>
                             </div>
+                            <%}%>
                         <%});%>
                         <% if(model.userSubjects.length < 1){ %>
                             <h4 class="text-muted" style="text-align:center;">Nemate predmeta za prikaz.</h4>
@@ -65,6 +91,7 @@
                     </div>
                 </div>
             </div>
+            <!--Panel za istoriju konsultacija-->
             <div class="tab-pane fade" id="consulthistory">
                 <div class="panel-body" style="padding: 0px; padding-top: 20px; height: 74%">
                     <div class="list-group" style="overflow:auto;height: 100%;padding-top: 1px;">
@@ -73,15 +100,24 @@
                         <div id="<%= subject.id %>" class="collapse">
                             <div class="list-group-item" style="background-color:#fafafa; padding:0px">
                                 <ul class="list-group">
+                                    <%var hcount = 0; subject.consults.forEach(consult => { if(consult.e_time != null && consult.status == false){ hcount++;}});%>
+                                    <% if(hcount > 0){%>
+                                    <%subject.consults.forEach(consult => {%>
+                                    <%if (consult.e_time != null && consult.status == false){%>
                                     <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
                                         <div class="col-lg-12">
-                                            <h4 style="margin-bottom:auto">Tema</h4>
+                                            <h4 style="margin-bottom:auto">Tema: <strong><%= consult.subject%></strong></h4>
                                         </div>
-                                        <p class="pull-left" style="margin-left: 10px;margin-bottom:auto">Vreme pocetka: d/m/y h/m</p>
-                                        <p class="pull-left" style="margin-left: 200px;margin-bottom:auto">Vreme kraja: d/m/y h/m</p>
-                                        <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Pogledaj konsultaciju</a>
+                                        <p class="pull-left" style="margin-left: 20px;margin-top:10px">Vreme pocetka: <strong><%= consult.s_time.getHours() + ":" + consult.s_time.getMinutes() + " " + consult.s_time.getUTCDate() + "/" + (consult.s_time.getUTCMonth()+1) + "/" + consult.s_time.getUTCFullYear()%></strong></p>
+                                        <a class="btn btn-default btn-lg pull-right consult_view" style="padding: 3px;margin-top:10px" data-toggle="modal" href="" value="<%= consult.id%>" name="<%=subject.id%>">Pogledaj konsultaciju</a>
+                                        <p class="pull-right" style="margin-right: 20px;margin-top:10px">Vreme kraja: <strong><%= consult.e_time.getHours() + ":" + consult.e_time.getMinutes() + " " + consult.e_time.getUTCDate() + "/" + (consult.e_time.getUTCMonth()+1) + "/" + consult.e_time.getUTCFullYear()%></strong></p>
                                     </li>
+                                    <%}%>
+                                    <%});%>
                                 </ul>
+                                <%}else{%>
+                                <h4 class="text-muted" style="text-align:center;">Nemate konsultacija za predmet.</h4>
+                                <%}%>
                             </div>
                         </div>
                         <%});%>
@@ -93,19 +129,24 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">     
+    <!--Desni panel-->
+    <div class="col-md-4"> 
+        <!--Panel u kome su prikazani svi predmeti koje profesor drzi-->
         <div class="panel panel-info">
             <div class="panel-heading">Predmeti<a class="btn btn-primary btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="#addSubject">Dodajte novi predmet</a></div>
             <div class="panel-body" style="overflow:auto;height: 35%;padding: 0px;">
                 <ul class="list-group">
                     <% model.userSubjects.forEach(function(subject){%>
-                        <li class="list-group-item clearfix">
+                        <li class="list-group-item clearfix" <%if(subject.status != true){%>style="background-color: whitesmoke;"<%}%>>
                             <div class="col-lg-12 clearfix" style="margin-bottom:10px;padding: 0px">
                                 <h4 class="pull-left" style="margin-bottom:auto"><%= subject.name%></h4>
                             </div>
                             <p class="pull-left" style="margin-left: 10px">Na <strong><% switch(subject.year){ case 1 :%>prvoj<%break;case 2:%>drugoj<%break;case 3:%>trecoj<%break;case 4:%>cetvrtoj<%break;case 5:%>petoj<%break;case 6:%>sestoj<%break;}%></strong> godini</p>
-                            <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Ugasi</a>
-                            <a class="btn btn-default btn-lg pull-right" style="padding: 3px;margin-right: 10px" data-toggle="modal" href="">Izmeni</a>
+                            <%if(subject.status == true){%>
+                                <a class="btn btn-default btn-lg pull-right subject_off" style="padding: 3px;" data-toggle="modal" href="" value="<%=subject.id%>">Ugasi</a>
+                            <%}else{%>
+                                <a class="btn btn-default btn-lg pull-right subject_on" style="padding: 3px;" data-toggle="modal" href="" value="<%=subject.id%>">Upali</a>
+                            <%}%>
                         </li>
                     <%});%>
                 </ul>
@@ -114,20 +155,31 @@
                 <%}%>
             </div>
         </div>
+        <!--Panel u kome su prikazane konsultacije koje su spremene za pocetak-->
         <div class="panel panel-info">
             <div class="panel-heading">Konsultacije spremne za pocetak</div>
             <div class="panel-body" style="overflow:auto;height: 28%;padding: 0px;">
-                <div class="list-group-item" style="background-color:#fafafa; padding:0px">
-                    <ul class="list-group">
-                        <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px;padding-bottom: 0px;padding-top: 0px">
-                            <div class="col-lg-12 clearfix" style="margin-bottom:10px;padding: 0px">
-                                <h4 class="pull-left" style="margin-bottom:auto">Tema</h4>
-                            </div>
-                            <p class="pull-left" style="margin-left: 10px">Predmet</p>
-                            <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Pocni konsultaciju</a>
-                        </li>
-                    </ul>
-                </div>
+                <ul class="list-group">
+                    <%var lcount = 0; model.userSubjects.forEach (function(subject){%>
+                        <%if(subject.status == true){%>
+                            <%subject.consults.forEach(consult => { if(consult.e_time == null && consult.status == false && consult.sc_time <= (new Date())){ lcount++;}});%>
+                            <%subject.consults.forEach(consult => {%>
+                                <% if(consult.e_time == null && consult.status == false && consult.s_time <= (new Date())){%>
+                                    <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px;padding-bottom: 0px;padding-top: 0px">
+                                        <div class="col-lg-12 clearfix" style="margin-bottom:10px;padding: 0px">
+                                            <h4 class="pull-left" style="margin-bottom:auto">Tema: <strong><%= consult.subject%></strong></h4>
+                                        </div>
+                                        <p class="pull-left" style="margin-left: 10px">Predmet: <strong><%= subject.name%></strong></p>
+                                        <a class="btn btn-default btn-lg pull-right start_button" style="padding: 3px;" data-toggle="modal" href="" value ="<%=consult.id%>">Pocni konsultaciju</a>
+                                    </li>
+                                <%}%>
+                            <%});%>
+                        <%}%>
+                    <%});%>
+                </ul>
+                <% if(lcount == 0){%>
+                    <h4 class="text-muted" style="text-align:center;">Trenutno nema konsultacija.</h4>
+                <%}%>
              </div>
         </div>
     </div>
@@ -171,78 +223,174 @@
             </div>
         </div>
     </div>
+    <div class="modal" id="createSingleConsult">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Zakazivanje ne zahtevane konsultacije</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal" action="/consult/createsingle" method="post">
+                            <fieldset>
+                                <div class="form-group">
+                                    <input type="hidden" id="request_subject" name="subject" value="">
+                                    <label class="col-lg-2 control-label" style="margin-top: 20px">Tema:</label>
+                                    <div class="col-lg-10">
+                                        <input type="text" class="form-control" name="cons_subject" placeholder="Tema" style="margin-top: 20px">
+                                    </div>
+                                    <label class="col-lg-2 control-label" style="margin-top: 40px">Vreme:</label>
+                                    <div class="col-lg-10" style="margin-top: 20px">
+                                        <%var date = new Date();%>
+                                        <div class="col-lg-2">
+                                            <label>Sat</label>
+                                            <select class="form-control" id="req_date_hours" name="hour" style="width: 65px">
+                                                <% for(var i = 0; i< 24; i++){%>
+                                                <option><%= i %></option>
+                                                <%}%>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <label>Minut</label>
+                                            <select class="form-control" id="req_date_minutes" name="minute" style="width: 65px">
+                                                <% for(var i = 0; i< 60; i++){%>
+                                                <option><%= i %></option>
+                                                <%}%>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <label>Dan</label>
+                                            <select class="form-control" id="req_date_days" name="day" style="width: 65px">
+                                                <% for(var i = 1; i< 32; i++){%>
+                                                <option><%= i %></option>
+                                                <%}%>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <label>Mesec</label>
+                                            <select class="form-control" id="req_date_months" name="month" style="width: 65px">
+                                                <% for(var i = 1; i< 13; i++){%>
+                                                <option><%= i %></option>
+                                                <%}%>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <label>Godina</label>
+                                            <select class="form-control" name="year" style="width: 80px">
+                                                <% for(var i = date.getFullYear(); i< date.getFullYear() + 2; i++){%>
+                                                <option><%= i %></option>
+                                                <%}%>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-lg-10 col-lg-offset-2">
+                                        <button id="requestsingle_button" type="submit" class="btn btn-primary pull-right">Zakazi konsultaciju</button>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 </div>
 <%} else if(model.user_type == "student"){%>
     <div class="row">
+    <!--Lavi panel-->
     <div class="col-md-8">
         <ul class="nav nav-tabs">
             <li class="active"><a href="#consultview" data-toggle="tab" aria-expanded="true">Pregled predmeta</a></li>
             <li class=""><a href="#consulthistory" data-toggle="tab" aria-expanded="false">Istorija konsultacija</a></li>
         </ul>
         <div id="myTabContent" class="tab-content">
+            <!--Panel za konsultacije-->
             <div class="tab-pane fade active in" id="consultview">
                 <div class="panel-body" style="padding: 0px; padding-top: 20px; height: 74%">
                     <div class="list-group" style="overflow:auto;height: 100%;padding-top: 1px;">
                         <% model.userSubjects.forEach (function(subject){%>
-                            <a class="list-group-item h2 clearfix" data-toggle="collapse" data-target="#c<%= subject.id %>" style="margin-top:-1px">
-                                <%= subject.name %>
-                                <div class="pull-right">
-                                    <span class="badge" style="margin-right: 10px; margin-top: 10px; background-color: rgb(251, 210, 117); color: white;font-size: 10px;">Novi zahtevi<span class="badge" id="notificationsCount" style="margin-left: 10px; background-color: white; color: rgb(251, 210, 117);font-size: 10px;">0</span></span>
-                                </div>
-                                <div class="pull-right">
-                                    <span class="badge" style="margin-right: 10px; margin-top: 10px; background-color: rgb(117, 202, 235); color: white;font-size: 10px;">Cekaju<span class="badge" id="notificationsCount" style="margin-left: 10px; background-color: white; color: rgb(117, 202, 235);font-size: 10px;">0</span></span>
-                                </div>
-                            </a>
-                            <div id="c<%= subject.id %>" class="collapse" style="background-color: whitesmoke;padding-bottom:1px">
-                                <div class="panel panel-default" style=" margin-bottom: 0px;border-top-width: 5px;margin-left: 10px;margin-right: 10px;">
-                                    <div class="panel-heading">
-                                        <h3 class="panel-title">Profesor: <strong><%= subject.PROFESSOR.name%></strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Godina: <strong><% switch(subject.year){ case 1 :%>prva<%break;case 2:%>druga<%break;case 3:%>treca<%break;case 4:%>cetvrta<%break;case 5:%>peta<%break;case 6:%>sesta<%break;}%></strong></h3>
+                            <%if(subject.status == true){%>
+                                <a class="list-group-item h2 clearfix" data-toggle="collapse" data-target="#c<%= subject.id %>" style="margin-top:-1px">
+                                    <%= subject.name %>
+                                    <%var ccount = 0; subject.consults.forEach(consult => { if(consult.e_time == null){ ccount++;}});%>
+                                    <% if(subject.consults != null && ccount > 0){%>
+                                    <div class="pull-right">
+                                        <span class="badge" style="margin-right: 10px; margin-top: 10px; background-color: rgb(117, 202, 235); color: white;font-size: 10px;">Konsultacije<span class="badge" id="notificationsCount" style="margin-left: 10px; background-color: white; color: rgb(117, 202, 235);font-size: 10px;"><%= ccount%></span></span>
                                     </div>
-                                    <div class="panel-body" style="padding: 0px;">
-                                    </div>
-                                </div>
-                                <div class="panel panel-primary" style=" margin-bottom: 0px;border-top-width: 5px;margin-left: 10px;margin-right: 10px;">
-                                    <div class="panel-heading" style="background-color: rgb(117, 202, 235);">
-                                        <h3 class="panel-title">Zahtevi za konsultaciju</h3>
-                                    </div>
-                                    <div class="panel-body" style="padding: 0px;">
-                                        <ul class="list-group">
-                                            <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
-                                                <p class="pull-left" style="margin-left: 10px;margin-bottom:auto">Status</p>
-                                                <p class="pull-left" style="margin-left: 50px;margin-bottom:auto">Tema</p>
-                                                <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Obrisi zahtev</a>
-                                                <p class="pull-right" style="margin-right: 10px;margin-bottom:auto">d/m/y h/m</p>
-                                            </li>
-                                        </ul>
-                                        <div class="clearfix" style="margin: 5px">
-                                            <button type="submit" class="btn btn-default pull-right requestButton" value="<%= subject.id%>">Zahtevaj konsultaciju</button>
+                                    <%}%>
+                                </a>
+                                <div id="c<%= subject.id %>" class="collapse" style="background-color: whitesmoke;padding-bottom:1px">
+                                    <div class="panel panel-default" style=" margin-bottom: 0px;border-top-width: 5px;margin-left: 10px;margin-right: 10px;">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">Profesor: <strong><%= subject.PROFESSOR.name%></strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Godina: <strong><% switch(subject.year){ case 1 :%>prva<%break;case 2:%>druga<%break;case 3:%>treca<%break;case 4:%>cetvrta<%break;case 5:%>peta<%break;case 6:%>sesta<%break;}%></strong></h3>
+                                        </div>
+                                        <div class="panel-body" style="padding: 0px;">
                                         </div>
                                     </div>
-                                </div>
-                                <div class="panel panel-info" style="margin:10px;">
-                                    <div class="panel-heading">
-                                        <h3 class="panel-title">Konsultacije u toku</h3>
+                                    <div class="panel panel-info" style="margin:10px;">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">Konsultacije</h3>
+                                        </div>
+                                        <div class="panel-body" style="padding: 0px;">
+                                                <% if(ccount > 0){%>
+                                                <ul class="list-group">
+                                                    <%subject.consults.forEach(consult => {%>
+                                                        <%if (consult.e_time == null){%>
+                                                            <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
+                                                                <div class="col-lg-12">
+                                                                    <h4 style="margin-bottom:auto">Tema: <strong><%= consult.subject%></strong></h4>
+                                                                </div>
+                                                                <p class="label <% if(consult.status){%>label-success<%}else{%>label-warning<%}%> pull-left" style="margin-left: 20px;margin-bottom:auto;margin-top: 10px">Status: <strong><% if(consult.status){%>Konsultacija u toku<%}else{%>Nije jos pocela<%}%></strong></p>
+                                                                <% if(consult.e_time == null && consult.status == true){%>
+                                                                    <a class="btn btn-primary btn-lg pull-right start_button" style="padding: 3px;" data-toggle="modal" href="" value="<%= consult.id%>" name="<%=subject.id%>">Pridruzi se</a>
+                                                                <%}%>
+                                                                <p class="pull-right" style="margin-right: 10px;margin-bottom:auto">Zakazano vreme pocetka: <strong><%= consult.sc_time.getUTCHours() + ":" + consult.sc_time.getMinutes() + " " + consult.sc_time.getUTCDate() + "/" + (consult.sc_time.getUTCMonth()+1) + "/" + consult.sc_time.getUTCFullYear()%></strong></p>
+                                                            </li>
+                                                        <%}%>
+                                                    <%});%>
+                                                </ul>
+                                                <%}else{%>
+                                                    <h4 class="text-muted" style="text-align:center;">Nemate konsultacija za predmet.</h4>
+                                                <%}%>
+                                        </div>
                                     </div>
-                                    <div class="panel-body" style="padding: 0px;">
-                                        <ul class="list-group">
-                                            <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
-                                                <div class="col-lg-12">
-                                                    <h4 style="margin-bottom:auto">Tema</h4>
-                                                </div>
-                                                <p class="pull-left" style="margin-left: 10px;margin-bottom:auto">Vreme pocetka: d/m/y h/m</p>
-                                                <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Pridruzi se</a>
-                                            </li>
-                                        </ul>
+                                    <div class="panel panel-default" style=" margin-bottom: 0px;border-top-width: 5px;margin-left: 10px;margin-right: 10px;">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">Zahtev za konsultaciju</h3>
+                                        </div>
+                                        <div class="panel-body" style="padding: 0px;">
+                                            <% if(subject.request != null){%>
+                                            <ul class="list-group">
+                                                <li class="list-group-item clearfix" style="border-radius: 0px">
+                                                    <div class="col-lg-12">
+                                                        <h4 class="pull-left" style="margin-bottom:auto">Tema: <strong><%= subject.request.subject%></strong></h4>
+                                                    </div>
+                                                    <p class="label <% switch(subject.request.status){ case 'approved' :%>label-success<%break;case 'rejected':%>label-danger<%break;case 'notApproved':%>label-info<%break;}%> pull-left" style="margin-left: 20px;margin-bottom:auto;margin-top: 10px">Status: <strong><% switch(subject.request.status){ case 'approved' :%>Odobrena<%break;case 'rejected':%>Odbijena<%break;case 'notApproved':%>Na cenkanju<%break;}%></strong></p>
+                                                    <a class="btn btn-danger btn-lg pull-right request_delete" style="padding: 3px;margin-top: 10px" data-toggle="modal" href="" value="<%=subject.id%>" name="<%=model.user.id%>">Obrisi zahtev</a>
+                                                    <p class="pull-right" style="margin-right: 10px;margin-bottom:10px;margin-top: 10px">Zahtev za odrzavanje datuma: <strong><%= subject.request.time.getUTCDate() + "/" + (subject.request.time.getUTCMonth()+1) + "/" + subject.request.time.getUTCFullYear()%></strong></p>
+                                                </li>
+                                            </ul>
+                                            <%}else {%>
+                                            <h4 class="text-muted" style="text-align:center;">Nemate zahtev za konsultaciju.</h4>
+                                            <%}%>
+                                        </div>
                                     </div>
+                                    <%if(subject.request == null){%>
+                                        <div class="clearfix" style="margin: 5px;">
+                                            <button type="submit" class="btn btn-primary pull-right requestButton" style="margin-right: 10px;margin-bottom:10px" value="<%= subject.id%>">Zahtevaj konsultaciju</button>
+                                        </div>
+                                    <%}%>
                                 </div>
-                            </div>
+                            <%}%>
                         <%});%>
                         <% if(model.userSubjects.length < 1){ %>
-                        <h4 class="text-muted" style="text-align:center;">Nemate predmeta za prikaz.</h4>
+                            <h4 class="text-muted" style="text-align:center;">Nemate predmeta za prikaz.</h4>
                         <%}%>
                     </div>
                 </div>
             </div>
+            <!--Panel sa istorijom konsultacija-->
             <div class="tab-pane fade" id="consulthistory">
                 <div class="panel-body" style="padding: 0px; padding-top: 20px; height: 74%">
                     <div class="list-group" style="overflow:auto;height: 100%;padding-top: 1px;">
@@ -251,15 +399,24 @@
                             <div id="<%= subject.id %>" class="collapse">
                                 <div class="list-group-item" style="background-color:#fafafa; padding:0px">
                                     <ul class="list-group">
-                                        <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
-                                            <div class="col-lg-12">
-                                                <h4 style="margin-bottom:auto">Tema</h4>
-                                            </div>
-                                            <p class="pull-left" style="margin-left: 10px;margin-bottom:auto">Vreme pocetka: d/m/y h/m</p>
-                                            <p class="pull-left" style="margin-left: 200px;margin-bottom:auto">Vreme kraja: d/m/y h/m</p>
-                                            <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Pogledaj konsultaciju</a>
-                                        </li>
+                                    <%var hcount = 0; subject.consults.forEach(consult => { if(consult.e_time != null && consult.status == false){ hcount++;}});%>
+                                    <% if(hcount > 0){%>
+                                    <%subject.consults.forEach(consult => {%>
+                                            <%if (consult.e_time != null && consult.status == false){%>
+                                                <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
+                                                    <div class="col-lg-12">
+                                                        <h4 style="margin-bottom:auto">Tema: <strong><%= consult.subject%></strong></h4>
+                                                    </div>
+                                                    <p class="pull-left" style="margin-left: 20px;margin-top:10px">Vreme pocetka: <strong><%= consult.s_time.getUTCHours() + ":" + consult.s_time.getUTCMinutes() + " " + consult.s_time.getUTCDate() + "/" + (consult.s_time.getUTCMonth()+1) + "/" + consult.s_time.getUTCFullYear()%></strong></p>
+                                                    <a class="btn btn-default btn-lg pull-right consult_view" style="padding: 3px;margin-top:10px" data-toggle="modal" value="<%= consult.id%>">Pogledaj konsultaciju</a>
+                                                    <p class="pull-right" style="margin-right: 20px;margin-top:10px">Vreme kraja: <strong><%= consult.e_time.getUTCHours() + ":" + consult.e_time.getUTCMinutes() + " " + consult.e_time.getUTCDate() + "/" + (consult.e_time.getUTCMonth()+1) + "/" + consult.e_time.getUTCFullYear()%></strong></p>
+                                                </li>
+                                            <%}%>
+                                    <%});%>
                                     </ul>
+                                    <%}else{%>
+                                        <h4 class="text-muted" style="text-align:center;">Nemate konsultacija za predmet.</h4>
+                                    <%}%>
                                 </div>
                             </div>
                         <%});%>
@@ -271,19 +428,23 @@
             </div>
         </div>
     </div>
+    <!--Desni paneli-->
     <div class="col-md-4">
+        <!--Panel za prikaz predmeta koje je student izabarao-->
         <div class="panel panel-info">
             <div class="panel-heading">Predmeti<a class="btn btn-primary btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="#addSubject">Prijavite se na predmet</a></div>
-            <div class="panel-body" style="overflow:auto;height: 33%;padding: 0px;">
+            <div class="panel-body" style="overflow:auto;height: 34%;padding: 0px;">
                 <ul class="list-group">
                     <% model.userSubjects.forEach(function(subject){%>
-                    <li class="list-group-item clearfix">
-                        <div class="col-lg-12 clearfix" style="margin-bottom:10px;padding: 0px">
-                            <h4 class="pull-left" style="margin-bottom:auto"><%= subject.name%></h4>
-                        </div>
-                        <p class="pull-left" style="margin-left: 10px"> </p>
-                        <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Odjavi</a>
-                    </li>
+                        <%if(subject.status == true){%>
+                            <li class="list-group-item clearfix">
+                                <div class="col-lg-12 clearfix" style="margin-bottom:10px;padding: 0px">
+                                    <h4 class="pull-left" style="margin-bottom:auto"><%= subject.name%></h4>
+                                </div>
+                                <p class="pull-left" style="margin-left: 10px">Prof: <strong><%= subject.PROFESSOR.name%></strong></p>
+                                <a class="btn btn-default btn-lg pull-right deselect_button" style="padding: 3px;" data-toggle="modal" href="" value="<%=subject.id%>">Odjavi</a>
+                            </li>
+                        <%}%>
                     <%});%>
                 </ul>
                 <% if (model.userSubjects.length < 1) {%>
@@ -291,20 +452,31 @@
                 <%}%>
             </div>
         </div>
+        <!--Panel za konsultacije koje su trenutno u toku i koje je profesor vec pokrenuo-->
         <div class="panel panel-info">
             <div class="panel-heading">Konsultacije koje su trenutno u toku</div>
             <div class="panel-body" style="overflow:auto;height: 28%;padding: 0px;">
-                <div class="list-group-item" style="background-color:#fafafa; padding:0px">
                     <ul class="list-group">
-                        <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px;padding-bottom: 0px;padding-top: 0px">
-                            <div class="col-lg-12 clearfix" style="margin-bottom:10px;padding: 0px">
-                                <h4 class="pull-left" style="margin-bottom:auto">Tema</h4>
-                            </div>
-                            <p class="pull-left" style="margin-left: 10px">Predmet</p>
-                            <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Pridruzi se</a>
-                        </li>
+                        <%var mcount = 0; model.userSubjects.forEach (function(subject){%>
+                            <%if(subject.status == true){%>
+                                <%subject.consults.forEach(consult => { if(consult.e_time == null && consult.status == true){ mcount++;}});%>
+                                <%subject.consults.forEach(consult => {%>
+                                    <%if (consult.e_time == null && consult.status == true){%>
+                                        <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px;padding-bottom: 0px;padding-top: 0px">
+                                            <div class="col-lg-12 clearfix" style="margin-bottom:10px;padding: 0px">
+                                                <h4 class="pull-left" style="margin-bottom:auto">Tema: <strong><%= consult.subject%></strong></h4>
+                                            </div>
+                                            <p class="pull-left" style="margin-left: 10px">Predmet: <strong><%= subject.name%></strong></p>
+                                            <a class="btn btn-default btn-lg pull-right start_button" style="padding: 3px;" data-toggle="modal" href="" vocab="<%=consult.id%>">Pridruzi se</a>
+                                        </li>
+                                    <%}%>
+                                <%});%>
+                            <%}%>
+                        <%});%>
                     </ul>
-                </div>
+                    <% if(mcount == 0){%>
+                        <h4 class="text-muted" style="text-align:center;">Trenutno nema konsultacija.</h4>
+                    <%}%>
             </div>
         </div>
     </div>
@@ -384,10 +556,57 @@
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         <h4 class="modal-title">Zahtev za konsultaciju</h4>
                     </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal" action="/subject/request" method="post">
+                            <fieldset>
+                                <div class="form-group">
+                                    <input type="hidden" id="request_subject" name="subject" value="">
+                                    <label class="col-lg-2 control-label" style="margin-top: 20px">Tema</label>
+                                    <div class="col-lg-10">
+                                        <input type="text" class="form-control" name="req_subject" placeholder="Tema" style="margin-top: 20px">
+                                    </div>
+                                    <label class="col-lg-2 control-label"  style="margin-top: 40px">Vreme:</label>
+                                    <div class="col-lg-6" style="margin-top: 20px">
+                                        <%var date = new Date();%>
+                                        <div class="col-lg-4">
+                                            <label>Dan</label>
+                                            <select class="form-control" id="req_date_days" name="day" style="width: 65px">
+                                                <% for(var i = 1; i< 32; i++){%>
+                                                <option><%= i %></option>
+                                                <%}%>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <label>Mesec</label>
+                                            <select class="form-control" id="req_date_months" name="month" style="width: 65px">
+                                                <% for(var i = 1; i< 13; i++){%>
+                                                    <option><%= i %></option>
+                                                <%}%>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <label>Godina</label>
+                                            <select class="form-control" name="year" style="width: 80px">
+                                                <% for(var i = date.getFullYear(); i< date.getFullYear() + 2; i++){%>
+                                                <option><%= i %></option>
+                                                <%}%>
+                                            </select>
+                                        </div>
+                                     </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-lg-10 col-lg-offset-2">
+                                        <button id="request_button" type="submit" class="btn btn-primary pull-right">Posaljite zahtev</button>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
 </div>
 <%}%>
+<script src="/socket.io/socket.io.js"></script>
 <script src="/scripts/dashboard.js"></script>
 <% include ../partials/footer %>

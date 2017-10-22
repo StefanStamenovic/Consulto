@@ -8,6 +8,13 @@ function Chat_vm() {
 
     var self = this;
     this.user_type;
+    this.consult;
+    this.messages;
+    this.subject;
+    this.professor;
+    this.students;
+    this.consultHash;
+    this.userHash;
 };
 
 module.exports = Chat_vm;
