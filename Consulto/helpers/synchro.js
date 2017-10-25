@@ -3,10 +3,10 @@ var models = require('../models');
 var crypto = require('crypto');
 var config = require('config');
 var key = config.get('config.key');
-
+var storage = models.Storage;
 module.exports = function (server){ 
     var server = require('socket.io')(server);
-    var storage = new models.Storage();
+
     server.on('connection', function (socket) {
 
         //Korisnik se odkonektovao

@@ -9,7 +9,10 @@ var key = config.get('config.key');
 var path = require('path');
 var formidable = require('formidable');
 var fs = require('fs');
-var storage = new models.Storage();
+var mailer = require('../helpers/email-service');
+//Iskljucivanje email servisa da nebi spamovao mejlove
+mailer.disable();
+var storage = models.Storage;
 
 var routes = [];
 /*
@@ -17,7 +20,158 @@ var routes = [];
 | SIGN AND LOG RUTE
 |--------------------------------------------------------------------------
 */
+//Krejiranje novog naloga za studenta
+routes.push(router.post('/signup/student', function (req, res) {
+    //Provera podataka
+    var name = req.body.name;
+    var email = req.body.email;
+    var password = req.body.password;
+    var index = req.body.index;
+    var year = req.body.year;
 
+    if (!name || !email || !password || !index || !year)
+        return res.status(400).json("Nevalidna vrednost nekog od polja.");
+    if (password.length < 5)
+        return res.status(400).json("Sifra je prekratka");
+    if (year < 0 || year > 5)
+        return res.status(400).json("Nevalidna vrednost godine, validen vrednosti su od 1-5");
+    if (!(/^\w+([\.-]?\w+)*@elfak.rs|elfak.ni.ac.rs/.test(email)))
+        return res.status(400).json("Nevalidna email adresa, dozvoljeni domeni su @elfak.rs i @elfak.ni.ac.rs.");
+
+    storage.findUserByEmail(email, (user, type) => {
+        if (user != null)
+            return res.status(400).json("Postoji nalog za datu email adresu.");
+        storage.checkIsIndexInUse(index, exist => {
+            if (exist)
+                return res.status(400).json("Nalog sa ovim brojem indeksa vec postoji.");
+            try {
+                //Hesiranje sifre
+                var hmac = crypto.createHmac('sha512', hash);
+                hmac.update(password);
+                var hashPassword = hmac.digest('hex');
+
+                var code = (Math.floor(Math.random() * 89999) + 10000).toString();
+
+                mailer.sendActivationCode(email, code);
+                storage.createStudent(name, email, hashPassword, index, year, code, () => {
+                    return res.json(true);
+                });
+
+            } catch (e) {
+                return res.status(400).json("Greska prilikom krejiranja naloga.");
+            }
+        });
+    });
+}));
+
+//Krejiranje novog naloga za profesora
+routes.push(router.post('/signup/professor', function (req, res) {
+    //Provera podataka
+    var name = req.body.name;
+    var email = req.body.email;
+    var password = req.body.password;
+
+    if (!name || !email || !password)
+        return res.status(400).json("Nevalidna vrednost nekog od polja.");
+    if (password.length < 5)
+        return res.status(400).json("Sifra je prekratka");
+    if (!(/^\w+([\.-]?\w+)*@elfak.rs|elfak.ni.ac.rs/.test(email)))
+        return res.status(400).json("Nevalidna email adresa, dozvoljeni domeni su @elfak.rs i @elfak.ni.ac.rs.");
+
+    storage.findUserByEmail(email, (user, type) => {
+       if (user != null)
+            return res.status(400).json("Postoji nalog za datu email adresu.");
+        try {
+            //Hesiranje sifre
+            var hmac = crypto.createHmac('sha512', hash);
+            hmac.update(password);
+            var hashPassword = hmac.digest('hex');
+
+            var code = (Math.floor(Math.random() * 89999) + 10000).toString();
+
+            mailer.sendActivationCode(email, code);
+
+            //Okretanje koda za profesora
+            code = code.split("").reverse().join("");
+            storage.createProfessor(name, email, hashPassword, code, () => {
+                return res.json(true);
+            });
+
+        } catch (e) {
+            return res.status(400).json("Greska prilikom krejiranja naloga.");
+        }
+    });
+}));
+
+//Ponovno slaje aktivacionog koda
+routes.push(router.post('/login/resendcq', function (req, res) {
+    var email = req.body.email;
+    if (!email || !(/^\w+([\.-]?\w+)*@elfak.rs|elfak.ni.ac.rs/.test(email)))
+        return res.status(400).json("Nevalidna email adresa.");
+    storage.findUserByEmail(email, (user, type) => {
+        if (user == null)
+            return res.status(400).json("Nepostojeci korisnik, mozda vam je nalog obrisan jer nije na vreme unesen kod potvrde.");
+        var code = user.confirmCode;
+        if (type == 'professor')
+            code = code.split("").reverse().join("");
+        mailer.sendActivationCode(email, code);
+        return res.json(true);
+    });
+}));
+
+//Provera aktivacionog koda i potvrda naloga ako je sve uredu
+routes.push(router.post('/login/confirm', function (req, res) {
+    var email = req.body.email;
+    var confcode = req.body.confcode;
+    if (!email || !(/^\w+([\.-]?\w+)*@elfak.rs|elfak.ni.ac.rs/.test(email)))
+        return res.status(400).json("Nevalidna email adresa.");
+    storage.findUserByEmail(email, (user, type) => {
+        if (user == null)
+            return res.status(400).json("Nepostojeci korisnik, mozda vam je nalog obrisan jer nije na vreme unesen kod potvrde.");
+        if (user.confirmCode == confcode)
+            storage.userConfirmed(email, type, function () {
+                return;
+            });
+        return res.json((user.confirmCode == confcode) ? true : false);
+    });
+}));
+
+//Provera podataka o logovanju kao i provera da li je potvrdjen nalog
+routes.push(router.post('/login', function (req, res) {
+    var email = req.body.email;
+    var password = req.body.password;
+
+    if (!email || !password)
+        return res.status(400).json("Prazno polje.");
+    if (password.length < 5)
+        return res.status(400).json("Sifra je prekratka");
+    if (!(/^\w+([\.-]?\w+)*@elfak.rs|elfak.ni.ac.rs/.test(email)))
+        return res.status(400).json("Nevalidna email adresa, dozvoljeni domeni su @elfak.rs i @elfak.ni.ac.rs.");
+
+    storage.findUserByEmail(email, function (user, user_type) {
+        if (user == null || !user.confirmed)
+            return res.json({ login: false, confirmed: false });
+
+        try {
+            var hmac = crypto.createHmac('sha512', hash);
+            hmac.update(password);
+            var hashPassword = hmac.digest('hex');
+
+            if (user.password == hashPassword) {
+                req.session.isLoged = true;
+                req.session.user_type = user_type;
+                req.session.user = user;
+                user.update({ status: true }).then(() => {
+                    return res.json({ login: true, confirmed: true });
+                });
+            }
+            else
+                return res.json({ login: false, confirmed: true });
+        } catch (e) {
+            return res.status(400).json("Greska prilikom logovanja.");
+        }
+    });
+}));
 
 /*
 |--------------------------------------------------------------------------
@@ -28,7 +182,6 @@ var routes = [];
 routes.push(router.post('/subject/create', function (req, res) {
     var name = req.body.name;
     var year = req.body.year;
-    var storage = new models.Storage();
     if (!req.session.isLoged || req.session.user_type != 'professor') {
         res.redirect('/error');
     }
@@ -40,7 +193,6 @@ routes.push(router.post('/subject/create', function (req, res) {
 //Ruta za selektovanje predmeta od strane studenta
 routes.push(router.post('/subject/select', function (req, res) {
     var subject = req.body.subject;
-    var storage = new models.Storage();
     if (!req.session.isLoged || req.session.user_type != 'student') {
         res.redirect('/error');
     }
@@ -52,7 +204,6 @@ routes.push(router.post('/subject/select', function (req, res) {
 //Ruta za odjavu predmeta od strane studenta
 routes.push(router.post('/subject/deselect', function (req, res) {
     var subject = req.body.subject;
-    var storage = new models.Storage();
     if (!req.session.isLoged || req.session.user_type != 'student') {
         res.redirect('/error');
     }
@@ -64,7 +215,6 @@ routes.push(router.post('/subject/deselect', function (req, res) {
 //Promena statusa predmeta na aktivan od strane profesora
 routes.push(router.post('/subject/active', function (req, res) {
     var subject = req.body.subject;
-    var storage = new models.Storage();
     if (!req.session.isLoged || req.session.user_type == 'student') {
         res.redirect('/error');
     }
@@ -76,7 +226,6 @@ routes.push(router.post('/subject/active', function (req, res) {
 //Promena statusa predmeta na ugasen od strane profesora
 routes.push(router.post('/subject/deactive', function (req, res) {
     var subject = req.body.subject;
-    var storage = new models.Storage();
     if (!req.session.isLoged || req.session.user_type == 'student') {
         res.redirect('/error');
     }
@@ -92,7 +241,6 @@ routes.push(router.post('/subject/request', function (req, res) {
     var day = req.body.day;
     var month = req.body.month;
     var year = req.body.year;
-    var storage = new models.Storage();
     if (!req.session.isLoged || req.session.user_type != 'student') {
         res.redirect('/error');
     }
@@ -105,7 +253,7 @@ routes.push(router.post('/subject/request', function (req, res) {
 routes.push(router.post('/request/delete', function (req, res) {
     var student = req.body.student;
     var subject = req.body.subject;
-    var storage = new models.Storage();
+
     if (!req.session.isLoged || req.session.user_type != 'student') {
         res.redirect('/error');
     }
@@ -123,7 +271,6 @@ routes.push(router.post('/consult/createsingle', function (req, res) {
     var year = req.body.year;
     var hour = req.body.hour;
     var minute = req.body.minute;
-    var storage = new models.Storage();
     if (!req.session.isLoged || req.session.user_type == 'student') {
         res.redirect('/error');
     }

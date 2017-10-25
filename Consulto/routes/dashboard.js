@@ -2,18 +2,17 @@
 var express = require('express');
 var router = express.Router();
 var models = require('../models');
-
+var storage = models.Storage;
 /* GET login page. */
 router.get('/dashboard', function (req, res) {
     var vmodel = new models.viewmodels.Dashboard_vm();
     vmodel.title = "Dashboard";
     if (!req.session.isLoged) {
-        res.redirect('/');
+        return res.render('./error', { message: 'Nemate pravo pristupa ovoj stranici.' });
     }
     vmodel.isLoged = req.session.isLoged;
     vmodel.user = req.session.user;
     vmodel.user_type = req.session.user_type;
-    var storage = new models.Storage();
 
     if (req.session.user_type == "professor") {
         storage.findProfessorSubjects(req.session.user, function (subjects) {

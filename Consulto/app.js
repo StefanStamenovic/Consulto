@@ -82,4 +82,4 @@ var server = app.listen(app.get('port'), function () {
 });
 
 //Ukjucivanje socket.io za rad sa realtime komunikacijom
-var realtime = require('./realtime/realtime')(server);
+var synchro = require('./helpers/synchro')(server);

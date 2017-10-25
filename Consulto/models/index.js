@@ -38,19 +38,28 @@ fs.readdirSync(__dirname + '/viewmodels').filter(function (file) {
 | DEFINISANJE VEZA ZA SEQUELIZE ORM-om
 |--------------------------------------------------------------------------
 */
-
 (function (m) {
+    //Professorov  slozeni atribut o zabranjenim datumima
+    var BlockedDates = sequelize.define('BLOCKED_DATES', {
+        date: { type: Sequelize.DATE, allowNull: false, validate: { isDate: true } }
+    });
+    m['BlockedDates'] = BlockedDates;
+    m.BlockedDates.belongsTo(m.Professor, {
+        onDelete: 'cascade',
+        foreignKey: 'professorId'
+    });
+
     //Profesor 1 PREDAJE n Predmet
     m.Professor.hasMany(m.Subject, {
         as: 'Subject',
         onDelete: 'cascade',
         foreignKey: 'professorId'
     });
-
     m.Subject.belongsTo(m.Professor, {
         onDelete: 'cascade',
         foreignKey: 'professorId'
     });
+
 
     //Konsultacija n ZA 1 Predmet
     m.Subject.hasMany(m.Consult, {
@@ -136,30 +145,31 @@ fs.readdirSync(__dirname + '/viewmodels').filter(function (file) {
 |--------------------------------------------------------------------------
 | Klasa koja se koristi za komunikaciju sa bazom
 */
-
-models.Storage = function () {
+var Storage = function () {
     /*
     |--------------------------------------------------------------------------
     | USER
     |--------------------------------------------------------------------------
     */
-    //CREATE
-    //--------------------------------------------------------------------------
-    //Kreira korisnika u bazi
-    this.createUser = function (user_type, name, email, hashPassword, index, year, callback) {
-        if (user_type == "professor") {
-            models.dbmodels.Professor.findOrCreate({ where: { email: email }, defaults: { name: name, email: email, password: hashPassword } }).then(professor => {
-                callback(professor);
-            });
-        }
-        else if (user_type == "student")
-            models.dbmodels.Student.findOrCreate({ where: { email: email }, defaults: { name: name, email: email, password: hashPassword, index: index, year: year } }).then(student => {
-                callback(student);
-            });
+    //Krejiranje profesora
+    this.createProfessor = function (name, email, password, code, callback) {
+        models.dbmodels.Professor.findOrCreate({ where: { email: email }, defaults: { name: name, email: email, password: password, confirmCode: code} }).then(professor => {
+            callback();
+        });
+    }
+    //Krejiranje studenta
+    this.createStudent = function (name, email, password, index, year, code, callback) {
+        models.dbmodels.Student.findOrCreate({ where: { email: email }, defaults: { name: name, email: email, password: password, index: index, year: year, confirmCode: code} }).then(student => {
+            callback();
+        });
+    }
+    //Kreira zabaranjen datum za professora
+    this.createBlockedDate = function (professor, date, callback) {
+        models.dbmodels.BlockedDates.findOrCreate({ where: { date: date }, defaults: {date: date, professorId: professor} }).then(blockedDate => {
+            callback(blockedDate);
+        });
     }
 
-    //READ
-    //--------------------------------------------------------------------------
     //Nalazi korisnika po emailu
     this.findProfessorByEmail = function (email, callback) {
         models.dbmodels.Professor.findOne({ where: { email: email } }).then(professor => {
@@ -171,7 +181,7 @@ models.Storage = function () {
             callback(student);
         });
     }
-    this.findUserByEmail = function(email,callback){
+    this.findUserByEmail = function (email, callback) {
         this.findProfessorByEmail(email, professor => {
             if (professor == null)
                 this.findStudentByEmail(email, student => {
@@ -182,19 +192,45 @@ models.Storage = function () {
         });
     }
 
-    //UPDATE
-    //--------------------------------------------------------------------------
+    //Proovera da li je index u upotrebi
+    this.checkIsIndexInUse = function (index, callback) {
+        models.dbmodels.Student.findOne({ where: { index: index }}).then(student => {
+            if (student)
+                callback(true);
+            else
+                callback(false);
+        });
+    }
 
-    //DELETE
-    //--------------------------------------------------------------------------
+    //Stavlja status na confirmed ako je korisnik potvrdio svoj nalog
+    this.userConfirmed = function (email, user_type, callback) {
+        if (user_type == 'professor')
+            models.dbmodels.Professor.findOne({ where: { email: email } }).then(professor => {
+                professor.update({ confirmed: true }).then(() => {
+                    callback();
+                });
+            });
+        else if(user_type == 'student')
+            models.dbmodels.Student.findOne({ where: { email: email } }).then(student => {
+                student.update({ confirmed: true }).then(() => {
+                    callback();
+                });
+            });
+    }
 
+    //Brise sve korisnike koji nisu potvrdili svoj status u roku od 24h 
+    this.deleteUnconfirmedUsers = function () {
+        //TODO: zavrsi
+    }
+    //Uklanja zabranjeni datum za profesora
+    this.deleteBlockedDate = function (professor, date, callback) {
+        //TODO: zavrsi
+    }
     /*
     |--------------------------------------------------------------------------
     | SUBJECT
     |--------------------------------------------------------------------------
     */
-    //CREATE
-    //--------------------------------------------------------------------------
     //Krejira predmet za profesora
     this.createSubject = function (professor, name, year, callback) {
         models.dbmodels.Professor.findById(professor.id).then(professor => {
@@ -212,12 +248,10 @@ models.Storage = function () {
         });
     }
 
-    //READ
-    //--------------------------------------------------------------------------
     //Nalazi predmete za profesora
     this.findProfessorSubjects = function (professor, callback) {
         models.dbmodels.Professor.findById(professor.id).then(professor => {
-            models.dbmodels.Subject.findAll({ where: { professorId: professor.id }, order: [['name', 'ASC']]}).then(subjects => {
+            models.dbmodels.Subject.findAll({ where: { professorId: professor.id }, order: [['name', 'ASC']] }).then(subjects => {
                 callback(subjects);
             });
         });
@@ -259,9 +293,11 @@ models.Storage = function () {
             });
         });
     }
+    //Nalazi blokirane datume za predmet
+    this.findSubjectBlockedDates = function (subject, callback) {
+        //TODO: zavrsi
+    }
 
-    //UPDATE
-    //--------------------------------------------------------------------------
     //Promena statusa na neaktivan
     this.subjectOff = function (subject, callback) {
         models.dbmodels.Subject.findById(subject).then(subject => {
@@ -285,8 +321,7 @@ models.Storage = function () {
         });
     }
 
-    //DELETE 
-    //--------------------------------------------------------------------------
+
     //Deselektuje predmet za studenta
     this.deselectSubjectForStudent = function (student, subjectId, callback) {
         models.dbmodels.Student.findById(student.id).then(student => {
@@ -300,25 +335,22 @@ models.Storage = function () {
     | CONSULT
     |--------------------------------------------------------------------------
     */
-    //CREATE
-    //--------------------------------------------------------------------------
+
     //Pravi konsultaciju za predmet i profesora
     this.createConsult = function (subject, csubject, scTime, callback) {
         models.dbmodels.Consult.create({ subject: csubject, sc_time: scTime, subjectId: subject }).then(() => {
             callback();
         });
     }
-
     //Zahteva konsultaciju za predmet
     this.requestConsult = function (student, subjectId, subject, time, callback) {
-        models.dbmodels.ConsultRequest.findOrCreate({ where: {studentId: student.id, subjectId: subjectId}, defaults: {status: 'notApproved', subject: subject, time: time, studentId: student.id, subjectId: subjectId}}).then(request => {
+        models.dbmodels.ConsultRequest.findOrCreate({ where: { studentId: student.id, subjectId: subjectId }, defaults: { status: 'notApproved', subject: subject, time: time, studentId: student.id, subjectId: subjectId } }).then(request => {
             callback();
         });
     }
-
     //Student se prikljucio konsultaciji
     this.studentJoinedConsult = function (student, consult, callback) {
-        models.dbmodels.ConsultAttend.findOrCreate({ where: { studentId: student, consultId: consult }, defaults: { status: true, studentId: student, consultId: consult} }).then(attend => {
+        models.dbmodels.ConsultAttend.findOrCreate({ where: { studentId: student, consultId: consult }, defaults: { status: true, studentId: student, consultId: consult } }).then(attend => {
             if (attend == null)
                 callback();
             attend[0].update({ status: true }).then(() => {
@@ -327,17 +359,14 @@ models.Storage = function () {
         });
     }
 
-    //READ
-    //--------------------------------------------------------------------------
     //Nalazi konsultaciju po idu
     this.findConsultById = function (consult, callback) {
         models.dbmodels.Consult.findById(consult).then(consult => {
             callback(consult);
         });
     }
-
     //Pronalazi studentov zahtev za dati predmet
-    this.findStudentConsultRequest = function (student, subjectId, callback){
+    this.findStudentConsultRequest = function (student, subjectId, callback) {
         models.dbmodels.ConsultRequest.findAll({ where: { studentId: student.id, subjectId: subjectId }, order: [['time', 'ASC']] }).then(request => {
             if (request[0] == undefined)
                 callback(null);
@@ -345,10 +374,9 @@ models.Storage = function () {
                 callback(request[0]);
         });
     }
-
     //Pronalazi sve poruke za konsultaciju
     this.findConsultMessages = function (consult, callback) {
-        models.dbmodels.Message.findAll({ where: { consultId: consult.id }}).then(messages => {
+        models.dbmodels.Message.findAll({ where: { consultId: consult.id } }).then(messages => {
             promises = [];
             messages.forEach(message => {
                 promises.push(new Promise((resolve, reject) => {
@@ -375,23 +403,20 @@ models.Storage = function () {
             });
         });
     }
-
     //Pronalazi predmet za datu konsultaciju
     this.findConsultSubject = function (consult, callback) {
         models.dbmodels.Subject.findById(consult.subjectId).then(subject => {
             callback(subject);
         });
     }
-
     //Praonalazi porfesora za datu konsultaciju
     this.findConsultProfessor = function (consult, callback) {
         models.dbmodels.Subject.findById(consult.subjectId).then(subject => {
-            models.dbmodels.Professor.findById(subject.professorId).then(professor =>{
+            models.dbmodels.Professor.findById(subject.professorId).then(professor => {
                 callback(professor);
             });
         });
     }
-
     //Pronalazi sve sutdente koji su prisutni na konsultaciji
     this.findConsultStudents = function (consult, callback) {
         models.dbmodels.Consult.findById(consult.id).then(consult => {
@@ -401,8 +426,6 @@ models.Storage = function () {
         });
     }
 
-    //UPDATE
-    //--------------------------------------------------------------------------
     //Pocinje konsultaciju
     this.startConsult = function (consult, callback) {
         models.dbmodels.Consult.findById(consult).then(consult => {
@@ -412,26 +435,22 @@ models.Storage = function () {
             });
         });
     }
-
     //Profesor je prisutan na konsultaciji
     this.professorJoinedConsult = function (consult, callback) {
         models.dbmodels.Consult.findById(consult).then(consult => {
-            consult.update({status: true }).then(() => {
+            consult.update({ status: true }).then(() => {
                 callback();
             });
         });
     }
-
     //Profesor je napustio konsultaciju ali je nije zavrsio
-    this.professorLeftConsult = function (consult, callback)
-    {
+    this.professorLeftConsult = function (consult, callback) {
         models.dbmodels.Consult.findById(consult).then(consult => {
             consult.update({ status: false }).then(() => {
                 callback();
             });
         });
     }
-
     //Student se odjavio sa konsultacije
     this.studentLeftConsult = function (student, consult, callback) {
         models.dbmodels.ConsultAttend.findOne({ where: { studentId: student, consultId: consult } }).then(attend => {
@@ -443,7 +462,6 @@ models.Storage = function () {
                 });
         });
     }
-
     //Zavrsava konsultaciju
     this.endConsult = function (consult, callback) {
         models.dbmodels.Consult.findById(consult).then(consult => {
@@ -473,38 +491,13 @@ models.Storage = function () {
         });
     }
 
-    //DELETE
-    //--------------------------------------------------------------------------
     //Brise zahtev za konsultaciju
     this.deleteConsultRequest = function (student, subject, callback) {
-        models.dbmodels.ConsultRequest.findOne({ where: { studentId: student, subjectId: subject }}).then(request => {
+        models.dbmodels.ConsultRequest.findOne({ where: { studentId: student, subjectId: subject } }).then(request => {
             request.destroy({ force: true }).then(() => {
                 callback();
             });
         });
-    }
-    //Krejira konsultaciju za date zahteve
-    this.createConsultFromRequests = function (professor, subjectName, csubject, scheduledTime, consultReqIds, callback) {
-        models.dbmodels.Subject.findOne({ where: { name: subjectName } }).then(subject => {
-            models.dbmodels.Consult.create({ subject: csubject, sc_time: scheduledTime, professorId: professor.id, subjectId: subject.id }).then(consult => {
-                var consReqArr = [];
-                consultReqIds.forEach(function (consReqId) {
-                    consReqArr.push({ id: consReqId });
-                });
-                models.dbmodels.ConsultRequest.bulkCreate(consReqArr).then(() => {
-                    return ConsultRequest.update({ consultId: consult.id});
-                }).then(() => {
-                    callback();
-                });
-            });
-        });
-    }
-
-    this.test = function (callback) {
-        models.dbmodels.Student.create({ email: 'student@gmail.com', name: 'Student Studentic', password: 1, year: 4, index: 1 }).then(student => {
-            student.addSUBJECT();
-        });
-        callback();
     }
 
     /*
@@ -512,31 +505,20 @@ models.Storage = function () {
     | MESSAGE
     |--------------------------------------------------------------------------
     */
-    //CREATE
-    //--------------------------------------------------------------------------
     //Krejira poruku za studenta
     this.createMessageStudent = function (content, consult, student, callback) {
         models.dbmodels.Message.create({ content: content, consultId: consult, studentId: student }).then(message => {
             callback();
         });
     }
-
     //Krejira poruku za profesora
     this.createMessageProfessor = function (content, consult, professor, callback) {
         models.dbmodels.Message.create({ content: content, consultId: consult, professorId: professor }).then(message => {
             callback();
         });
     }
+};
 
-    //READ
-    //--------------------------------------------------------------------------
-
-    //UPDATE
-    //--------------------------------------------------------------------------
-
-    //DELETE
-    //--------------------------------------------------------------------------
-}
-
+models.Storage = new Storage();
 models.sequelize = sequelize;
 module.exports = models;

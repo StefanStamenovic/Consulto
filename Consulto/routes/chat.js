@@ -5,16 +5,16 @@ var models = require('../models');
 var crypto = require('crypto');
 var config = require('config');
 var key = config.get('config.key');
-
+var storage = models.Storage;
 /* GET login page. */
 router.all('/chat', function (req, res) {
     var consult = req.body.consult;
     if (!req.session.isLoged)
-        return res.render('/error', {message: 'Nemate pravo pristupa ovoj stranici.'});
+        return res.render('./error', {message: 'Nemate pravo pristupa ovoj stranici.'});
 
     var vmodel = new models.viewmodels.Chat_vm();
     vmodel.title = "Chat";
-    var storage = new models.Storage();
+    
     try {
         storage.findConsultById(consult, consult => {
             if (consult == null)

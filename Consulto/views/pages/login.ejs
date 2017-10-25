@@ -1,37 +1,45 @@
 ﻿<% include ../partials/head %>
 <div class="row">
-    <div class="col-md-8 col-lg-offset-2" style="margin-bottom: 42px; margin-top: 40px;">
+    <div id="error_msg" style="padding-left: 0px; width: 66%" class="row center-block"></div>
+    <div id="login-view" class="col-md-8 col-lg-offset-2" style="margin-bottom: 42px; margin-top: 40px;">
+        <div id="error_msg" style="padding-left: 0px; width: 90%" class="row center-block"></div>
         <div class="jumbotron" style="padding-top: 0px;">
             <h1 class="col-lg-offset-4" style="margin-top: 20px;">Prijava</h1>
             <hr style=" margin-bottom: 90px;" />
-            <% if (null != null) { %>
-            <div class="col-lg-offset-3">
-                <div class="alert alert-dismissible alert-danger" style="width: 60%; margin-top: -74px;">
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    <strong><%= error %></strong>
-                </div>
-            </div>
-            <% } %>
-            <form class="form-horizontal col-lg-offset-3" action="/login" method="post">
+            <form class="form-horizontal col-lg-offset-3" action="javascript:void(0);">
                 <fieldset>
                     <div class="form-group">
                         <div class="col-lg-10">
-                            <input type="email" name="email" class="form-control" id="author" placeholder="Email">
+                            <input type="email" name="email" class="form-control" id="email" placeholder='Email'>
                         </div>
                     </div>
                     <div class="form-group" style="margin-bottom: 40px;">
                         <div class="col-lg-10">
-                            <input type="password" name="password" class="form-control" id="artist" placeholder="Sifra">
+                            <input type="password" name="password" class="form-control" id="password" placeholder="Sifra">
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-md-10 col-lg-offset-1">
-                            <button type="submit" class="btn btn-primary" style="width: 50%; font-size: 25px">Prijavi se</button>
+                            <button id="login-button" class="btn btn-primary" style="width: 50%; font-size: 25px">Prijavi se</button>
                         </div>
                     </div>
                 </fieldset>
             </form>
         </div>
     </div>
+    <div id="confirm-code" class="col-md-12" style="display: none;">
+        <form class="form-horizontal col-md-6 col-lg-offset-3" action="javascript:void(0);">
+            <fieldset>
+                <label class="control-label">Unesite aktivacioni kod</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="confcode">
+                    <span class="input-group-btn">
+                        <button id="confirm-button" class="btn btn-default" type="button">Potvrdi</button>
+                    </span>
+                </div>
+            </fieldset>
+            <a id="code-resend-button" style="cursor: pointer">Ponovo posalji aktivacioni kod</a>
+        </form>
+    </div>
 </div>
-<% include ../partials/footer %>
+<script src="/scripts/login.js"></script>

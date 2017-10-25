@@ -1,10 +1,11 @@
 ﻿<% include ../partials/head %>
 <div class="row">
+    <div id="error_msg" style="padding-left: 0px; width: 66%" class="row center-block"></div>
     <div id="choice" class="col-md-12">
-        <div class="col-md-12" style="margin-top: 160px;margin-bottom: 208px;">
+        <div class="col-md-8 col-lg-offset-2" style="margin-top: 160px;margin-bottom: 208px;">
             <h1 style="color: #555555; text-align: center; margin-bottom: 20px;">Izaberite nalog:</h1>
             <div class="col-md-12">
-                <a id="student" class="btn btn-primary btn-lg center-block" style="width: 300px; margin-bottom: 20px; font-size: 50px">Student</a>
+                <a id="student" class="btn btn-primary btn-lg center-block" style="width: 300px; margin-bottom: 20px; font-size: 50px; background-color: #75caeb; border-color: #6a9eb3">Student</a>
             </div>
             <div class="col-md-12">
                 <a id="professor" class="btn btn-primary btn-lg center-block" style="width: 300px; margin-bottom: 20px; font-size: 50px">Profesor</a>
@@ -15,84 +16,97 @@
         <div class="jumbotron" style="padding-top: 0px;padding-bottom: 10px">
             <h1 style="margin-top: 20px; text-align:center">Registracija</h1>
             <hr style=" margin-bottom: 20px;" />
-            <form class="form-horizontal col-lg-offset-3" action="/signup" method="post">
+            <form class="form-horizontal col-lg-offset-3" action="javascript:void(0);">
                 <fieldset>
                     <div class="form-group">
                         <div class="col-lg-10">
-                            <input type="text" name="name" class="form-control" placeholder="Ime i prezime">
+                            <input type="text" name="name" class="form-control" id="student-name" placeholder="Ime i prezime">
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-10">
-                            <input type="email" name="email" class="form-control" placeholder="Email">
+                            <input type="email" name="email" class="form-control" id="student-email" placeholder='Email "@elfak.rs ili @elfak.ni.ac.rs"'>
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-10">
-                            <input type="password" name="password" class="form-control" placeholder="Sifra">
-                        </div>
-                    </div>
-                    <div class="form-group" style="margin-bottom: 40px;">
-                        <div class="col-lg-10">
-                            <input type="password" name="confirm" class="form-control" placeholder="Potvrdi sifru">
+                            <input type="password" name="password" class="form-control" id="student-password" placeholder="Sifra">
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-10">
-                            <input type="number" name="index" class="form-control" placeholder="Broj indeksa">
+                            <input type="password" name="confirm" class="form-control" id="student-confirm-password" placeholder="Potvrdi sifru">
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-10">
-                            <input type="number" name="year" class="form-control" placeholder="Godina studija">
+                            <input type="number" name="index" class="form-control" id="student-index" placeholder="Broj indeksa">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-10">
+                            <input type="number" name="year" class="form-control" id="student-year" placeholder="Godina studija">
                         </div>
                     </div>
                     <input type="hidden" name="user" value="student">
                     <div class="form-group">
                         <div class="col-md-10 col-lg-offset-1">
-                            <button type="submit" class="btn btn-primary" style="width: 50%;font-size: 25px">Registruj se</button>
+                            <button id="reguister-student" class="btn btn-primary" style="width: 50%;font-size: 25px">Registruj se</button>
                         </div>
                     </div>
                 </fieldset>
             </form>
         </div>
     </div>
-    <div id="signup-professor" class="col-md-8 col-lg-offset-2" style="display: none; margin-bottom: 6px; margin-top: 40px;" >
+    <div id="signup-professor" class="col-md-8 col-lg-offset-2" style="display: none; margin-bottom: 6px;" >
         <div class="jumbotron" style="padding-top: 0px">
             <h1 style="margin-top: 20px; text-align:center">Registracija</h1>
             <hr style=" margin-bottom: 20px;" />
-            <form class="form-horizontal col-lg-offset-3" action="/signup" method="post">
+            <form class="form-horizontal col-lg-offset-3" action="javascript:void(0);">
                 <fieldset>
                     <div class="form-group">
                         <div class="col-lg-10">
-                            <input type="text" name="name" class="form-control" id="author" placeholder="Ime i prezime">
+                            <input type="text" name="name" class="form-control" id="professor-name" placeholder="Ime i prezime">
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-10">
-                            <input type="email" name="email" class="form-control" id="author" placeholder="Email">
+                            <input type="email" name="email" class="form-control" id="professor-email" placeholder='Email "@elfak.rs ili @elfak.ni.ac.rs"'>
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-lg-10">
-                            <input type="password" name="password" class="form-control" id="artist" placeholder="Sifra">
+                            <input type="password" name="password" class="form-control" id="professor-password" placeholder="Sifra">
                         </div>
                     </div>
                     <div class="form-group" style="margin-bottom: 40px;">
                         <div class="col-lg-10">
-                            <input type="password" name="confirm" class="form-control" id="artist" placeholder="Potvrdi sifru">
+                            <input type="password" name="confirm" class="form-control" id="professor-confirm-password" placeholder="Potvrdi sifru">
                         </div>
                     </div>
-                    <input type="hidden" name="user" value="professor">
                     <div class="form-group">
                         <div class="col-md-10 col-lg-offset-1">
-                            <button type="submit" class="btn btn-primary" style="width: 50%;font-size: 25px">Registruj se</button>
+                            <button id="reguister-professor" class="btn btn-primary" style="width: 50%;font-size: 25px">Registruj se</button>
                         </div>
                     </div>
                 </fieldset>
             </form>
         </div>
     </div>
+    <div id="confirm-code" class="col-md-12" style="display: none;">
+        <form class="form-horizontal col-md-6 col-lg-offset-3" action="javascript:void(0);">
+            <fieldset>
+                <label class="control-label">Unesite aktivacioni kod</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="confcode">
+                    <span class="input-group-btn">
+                        <button id="confirm-button" class="btn btn-default" type="button">Potvrdi</button>
+                    </span>
+                </div>
+            </fieldset>
+            <a id="code-resend-button" style="cursor: pointer">Ponovo posalji aktivacioni kod</a>
+        </form>
+    </div>
+
 </div>
 <script src="/scripts/signup.js"></script>
-<% include ../partials/footer %>

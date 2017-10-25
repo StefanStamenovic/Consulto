@@ -7,6 +7,11 @@
       "dbname": "consulto",
       "username": "root",
       "password": "root"
-    }
+    },
+    "emailconfig": {
+      "service": "Hotmail",
+      "user": "consulto.elfak@outlook.com",
+      "pass": "Consulto@2017"
+    }  
   }
 }

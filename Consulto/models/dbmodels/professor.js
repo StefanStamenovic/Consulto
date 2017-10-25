@@ -9,7 +9,9 @@ module.exports = function (sequelize, DataTypes) {
         name: { type: Sequelize.STRING, allowNull: false },
         email: { type: Sequelize.STRING, allowNull: false, unique: true, validate: { isEmail: true } },
         password: { type: Sequelize.STRING, allowNull: false },
-        status: { type: Sequelize.BOOLEAN, defaultValue: false }
+        status: { type: Sequelize.BOOLEAN, defaultValue: false },
+        confirmCode: { type: Sequelize.STRING, allowNull: true },
+        confirmed: { type: Sequelize.BOOLEAN, defaultValue: false }
     });
     return Professor;
 };

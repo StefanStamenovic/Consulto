@@ -11,7 +11,9 @@ module.exports = function (sequelize, DataTypes) {
         password: { type: Sequelize.STRING, allowNull: false },
         status: { type: Sequelize.BOOLEAN, defaultValue: false },
         index: { type: Sequelize.STRING, unique: true, allowNull: false },
-        year: { type: Sequelize.INTEGER, allowNull: false, validate: { isNumeric: true, min: 1, max: 6 } }
+        year: { type: Sequelize.INTEGER, allowNull: false, validate: { isNumeric: true, min: 1, max: 6 } },
+        confirmCode: { type: Sequelize.STRING, allowNull: true },
+        confirmed: { type: Sequelize.BOOLEAN, defaultValue: false }
     });
     return Student;
 };

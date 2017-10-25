@@ -30,6 +30,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="app.js" />
+    <Compile Include="helpers\email-service.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="models\dbmodels\consult.js">
       <SubType>Code</SubType>
     </Compile>
@@ -75,10 +78,16 @@
     <Compile Include="public\scripts\dashboard.js">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="realtime\realtime.js">
+    <Compile Include="helpers\synchro.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="public\scripts\login.js">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="public\scripts\signup.js">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="helpers\schedule.js">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="routes\api.js">
@@ -140,7 +149,7 @@
     <Folder Include="models\viewmodels\" />
     <Folder Include="config\" />
     <Folder Include="uploads\" />
-    <Folder Include="realtime\" />
+    <Folder Include="helpers\" />
     <Folder Include="public\" />
     <Folder Include="public\images\" />
     <Folder Include="public\lib\" />
