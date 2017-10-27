@@ -1,6 +1,9 @@
 ﻿'use strict'
 var models = require('../models');
+var mailer = require('./email-service');
+var synchro = require('../helpers/synchro');
 var storage = models.Storage;
+
 var Schedule = function () {
     this.timeout = null;
     this.interval = null;
@@ -32,50 +35,26 @@ var Schedule = function () {
 
     //Funkcija koja brise sve naloge koji nisu potvrdjeni
     this.accountConfirmChecking = function () {
-        console.log(getNowDate());
-    }
-
-    //Startuje sistem za notifikaciju 
-    this.startConsultNotification = function () {
-        try {
-            if (this.timeout != null || this.nextNotifConsult)
-                throw new Error('Notifikacija za konsultacije je vec startovana.');
-            else
-                storage.findNextConsultForNotification(consult => {
-                    try {
-                        if (consult != null) {
-                            timems = consult.sc_time - getNowDate();
-                            this.nextNotifConsult = consult;
-                            this.timeout = setTimeout(this.consultNotification, timems);
-                        }
-                        else {
-                            //Fake consult
-                            this.nextNotifConsult = { sc_time: new Date() };
-                        }
-                    } catch (e) {
-                        console.errr(e);
-                    }
-                });
-
-        } catch (e) {
-            console.warn(e);
-        }
+        storage.deleteUnconfirmedUsers(function () {
+        });
     }
 
     //Nova konsultacija je napravljena proveri da li je sledeca za notifikaciju 
-    this.newConsultNotifi = function (consult) {
+    this.newConsultNotification = function () {
         try {
-            if (this.nextNotifConsult == null)
-                throw Error("Sistem notifikacije novih konsultacija nije startovan.")
-
-            if (this.nextNotifConsult.sc_time > consult.sc_time) {
-                this.nextNotifConsult = consult;
-
-                var timems = nextConsultTime - getNowDate();
-                if (this.timeout != null)
-                    clearTimeout(this.timeout);
-                this.timeout = setTimeout(this.consultNotification, timems);
-            }
+            storage.findNextConsultForNotification(consult => {
+                try {
+                    if (!this.nextNotifConsult)
+                        this.nextNotifConsult = { id: -1, sc_time: getNowDate() };
+                    if (consult != null && this.nextNotifConsult.id != consult.id) {
+                        timems = consult.sc_time - getNowDate();
+                        this.nextNotifConsult = consult;
+                        this.timeout = setTimeout(this.consultNotification, timems);
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            });
         } catch (e) {
             console.warn(e);
         }
@@ -83,7 +62,17 @@ var Schedule = function () {
 
     //Funkcija koja vrsi notifikaciju profesora za pocetak konsultacije
     this.consultNotification = function () {
-
+        storage.findConsultSubject(nextNotifConsult, subject => {
+            storage.findConsultProfessor(nextNotifConsult, professor => {
+                try {
+                    synchro.io().sockets.in('professor-' + professor.id).emit('dashboard consult ready');
+                    storage.sendConsulReminderEmail(professor.email, consult, subject.name);
+                    this.newConsultNotification();
+                } catch (e){
+                    console.warn(e);
+                }
+            });
+        });
     }
 
     //Vraca vreme na serveru

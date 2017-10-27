@@ -69,8 +69,10 @@
     <Compile Include="models\viewmodels\viewmodel.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="public\lib\bootstrap-datetimepicker.min.js" />
     <Compile Include="public\lib\bootstrap.min.js" />
     <Compile Include="public\lib\jquery-3.2.1.min.js" />
+    <Compile Include="public\lib\moment-with-locales.js" />
     <Compile Include="public\lib\respond.min.js" />
     <Compile Include="public\scripts\chat.js">
       <SubType>Code</SubType>
@@ -113,8 +115,14 @@
       <SubType>Code</SubType>
     </Content>
     <Content Include="package.json" />
+    <Content Include="public\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="public\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="public\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="public\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="public\fonts\glyphicons-halflings-regular.woff2" />
     <Content Include="public\images\file.png" />
     <Content Include="public\images\image.png" />
+    <Content Include="public\stylesheets\bootstrap-datetimepicker.min.css" />
     <Content Include="public\stylesheets\bootstrap.min.css" />
     <Content Include="public\stylesheets\main.css" />
     <Content Include="README.md" />
@@ -148,6 +156,7 @@
     <Folder Include="models\dbmodels\" />
     <Folder Include="models\viewmodels\" />
     <Folder Include="config\" />
+    <Folder Include="public\fonts\" />
     <Folder Include="uploads\" />
     <Folder Include="helpers\" />
     <Folder Include="public\" />

@@ -7,8 +7,10 @@ function Dashboard_vm() {
     this.ViewModel();
 
     var self = this;
+    this.userHash;
     this.user_type;
     this.userSubjects;
+    this.userSubjectsIds;
     this.allSubjects;
 };
 

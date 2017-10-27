@@ -1,7 +1,6 @@
 ﻿$(document).ready(function () {
     //Inicijalizacija socket.io klijenta
     var socket = io();
-
     //Ucitavanje poruka na pocetku
     $.ajax(
         {
@@ -9,12 +8,13 @@
             type: "POST",
             data: { consultHash: consultHash, userHash: userHash },
             success: function (messages) {
+                var messagesjq = $('#messages');
                 //Updejtovanje liste studenata
-                while ($('#messages').children().length) $('#messages').children()[$('#messages').children().length - 1].remove();
+                while (messagesjq.children().length) messagesjq.children()[messagesjq.children().length - 1].remove();
                 messages.forEach(message => {
                     var date = new Date(message.date);
                     if (message.my)
-                        $('#messages').append('<div style="width:100%;display: flow-root;">' +
+                        messagesjq.append('<div style="width:100%;display: flow-root;">' +
                                         '<div class="message-right pull-right" style="max-width: 80%;overflow:hidden;border-right:5px solid ' + ((message.user_type == "student") ? '#75caeb;' : '#158cba;') + '">' +
                                             '<div class="row message-left-content" style="margin-left: 10px; overflow-x: auto;margin-right: 0px;padding-right: 10px;">' +
                                                 '<h5 style="white-space: pre-wrap;word-wrap: break-word; ">' + message.message + '</h5>' +
@@ -25,7 +25,7 @@
                                         '</div>' +
                                     '</div>');
                     else
-                        $('#messages').append('<div style="width:100%;">' +
+                        messagesjq.append('<div style="width:100%;">' +
                                                 '<div class="message-left" style="max-width: 80%;overflow:hidden;border-left:5px solid ' + ((message.user_type == "student") ? '#75caeb;' : '#158cba;') + '">' +
                                                     '<div class="row clearfix message-left-title">' +
                                                         '<p style="margin-right: 10px;padding-left: 20px;"><strong id="msg_user">' + message.username + '</strong></p>' +
@@ -39,7 +39,7 @@
                                                 '</div>' +
                                             '</div>');
                 });
-                $('#messages').scrollTop($('#messages').prop("scrollHeight"));
+                messagesjq.scrollTop(messagesjq.prop("scrollHeight"));
             },
             error: function () {
                 showError("Greska kod ucitavanja poruka", "Nemogu se pribaviti poruke.");

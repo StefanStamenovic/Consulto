@@ -12,6 +12,15 @@ var fs = require('fs');
 var mailer = require('../helpers/email-service');
 //Iskljucivanje email servisa da nebi spamovao mejlove
 mailer.disable();
+var synchro = require('../helpers/synchro');
+//Ukljucivanje schedule
+var schedule = require('../helpers/schedule');
+//Interval provere je 24 sata
+schedule.startAccountCheck(1000 * 60 * 60 * 24);
+//Startuje se notifikacija o pocetku konsultacije
+schedule.newConsultNotification();
+
+
 var storage = models.Storage;
 
 var routes = [];
@@ -52,7 +61,7 @@ routes.push(router.post('/signup/student', function (req, res) {
 
                 var code = (Math.floor(Math.random() * 89999) + 10000).toString();
 
-                mailer.sendActivationCode(email, code);
+                mailer.sendActivationCodeEmail(email, code);
                 storage.createStudent(name, email, hashPassword, index, year, code, () => {
                     return res.json(true);
                 });
@@ -89,7 +98,7 @@ routes.push(router.post('/signup/professor', function (req, res) {
 
             var code = (Math.floor(Math.random() * 89999) + 10000).toString();
 
-            mailer.sendActivationCode(email, code);
+            mailer.sendActivationCodeEmail(email, code);
 
             //Okretanje koda za profesora
             code = code.split("").reverse().join("");
@@ -114,7 +123,7 @@ routes.push(router.post('/login/resendcq', function (req, res) {
         var code = user.confirmCode;
         if (type == 'professor')
             code = code.split("").reverse().join("");
-        mailer.sendActivationCode(email, code);
+        mailer.sendActivationCodeEmail(email, code);
         return res.json(true);
     });
 }));
@@ -178,26 +187,69 @@ routes.push(router.post('/login', function (req, res) {
 | DASHBOARD RUTE
 |--------------------------------------------------------------------------
 */
+
 //Ruta za krejiranje predmeta od strane profesora
 routes.push(router.post('/subject/create', function (req, res) {
-    var name = req.body.name;
+    var subject = req.body.subject;
     var year = req.body.year;
+
+    if (!subject || !year)
+        return res.status(400).json('Prazan parametar');
+    if (year < 1 || year > 5)
+        return res.status(400).json('Pogresan vrednost za godinu.');
     if (!req.session.isLoged || req.session.user_type != 'professor') {
-        res.redirect('/error');
+        return res.status(400).json('Nemate prava pristupa ovim podatcima');
     }
-    storage.createSubject(req.session.user, name, year, function () {
-        res.redirect('/dashboard')
+    storage.createSubject(req.session.user, subject, year, function () {
+        res.json(true);
     });
 }));
+
+//Promena statusa predmeta na aktivan od strane profesora
+routes.push(router.post('/subject/activate', function (req, res) {
+    var subject = req.body.subject;
+
+    if (!req.session.isLoged || req.session.user_type != 'professor') {
+        return res.status(400).json('Nemate prava pristupa ovim podatcima');
+    }
+    storage.findSubjecById(subject, subject => {
+        if (!subject)
+            return res.status(400).json('Ne postoji predmet.');
+        storage.subjectOn(subject.id, function () {
+            res.json(true);
+        });
+    });
+}));
+
+//Promena statusa predmeta na ugasen od strane profesora
+routes.push(router.post('/subject/deactivate', function (req, res) {
+    var subject = req.body.subject;
+
+    if (!req.session.isLoged || req.session.user_type != 'professor') {
+        return res.status(400).json('Nemate prava pristupa ovim podatcima');
+    }
+    storage.findSubjecById(subject, subject => {
+        if (!subject)
+            return res.status(400).json('Ne postoji predmet.');
+        storage.subjectOff(subject.id, function () {
+            res.json(true);
+        });
+    });
+}));
+
 
 //Ruta za selektovanje predmeta od strane studenta
 routes.push(router.post('/subject/select', function (req, res) {
     var subject = req.body.subject;
     if (!req.session.isLoged || req.session.user_type != 'student') {
-        res.redirect('/error');
+        return res.status(400).json('Nemate prava pristupa ovim podatcima');
     }
-    storage.selectSubjectForStudent(req.session.user, subject, function () {
-        res.redirect('/dashboard')
+    storage.findSubjecById(subject, subject => {
+        if (!subject)
+            return res.status(400).json('Ne postoji predmet.');
+        storage.selectSubjectForStudent(req.session.user, subject.id, function () {
+            res.json(true);
+        });
     });
 }));
 
@@ -205,79 +257,151 @@ routes.push(router.post('/subject/select', function (req, res) {
 routes.push(router.post('/subject/deselect', function (req, res) {
     var subject = req.body.subject;
     if (!req.session.isLoged || req.session.user_type != 'student') {
-        res.redirect('/error');
+        return res.status(400).json('Nemate prava pristupa ovim podatcima');
     }
-    storage.deselectSubjectForStudent(req.session.user, subject, function () {
-        res.redirect('/dashboard')
+    storage.findSubjecById(subject, subject => {
+        if (!subject)
+            return res.status(400).json('Ne postoji predmet.');
+        storage.deselectSubjectForStudent(req.session.user, subject.id, function () {
+            res.json(true);
+        });
     });
 }));
 
-//Promena statusa predmeta na aktivan od strane profesora
-routes.push(router.post('/subject/active', function (req, res) {
-    var subject = req.body.subject;
-    if (!req.session.isLoged || req.session.user_type == 'student') {
-        res.redirect('/error');
-    }
-    storage.subjectOn(subject, function () {
-        res.redirect('/dashboard')
-    });
-}));
+//|--------------------------------------------------------------------------
 
-//Promena statusa predmeta na ugasen od strane profesora
-routes.push(router.post('/subject/deactive', function (req, res) {
-    var subject = req.body.subject;
-    if (!req.session.isLoged || req.session.user_type == 'student') {
-        res.redirect('/error');
-    }
-    storage.subjectOff(subject, function () {
-        res.redirect('/dashboard')
-    });
-}));
-
-//Ruta za slanje zahteva za konsultaciju
-routes.push(router.post('/subject/request', function (req, res) {
+//Ruta za slanje zahteva za konsultaciju od strane studenta
+routes.push(router.post('/consultrequest/request', function (req, res) {
     var subject = req.body.subject;
     var req_subject = req.body.req_subject;
-    var day = req.body.day;
-    var month = req.body.month;
-    var year = req.body.year;
+
+    var date = req.body.sc_date;
+    var nowdate = new Date() + new Date().getTimezoneOffset() * 60000;
+
+    if(!subject || !req_subject || !date)
+        return res.status(400).json('Prazno polje.');
     if (!req.session.isLoged || req.session.user_type != 'student') {
-        res.redirect('/error');
+        return res.status(400).json('Nemate prava pristupa ovim podatcima');
     }
-    storage.requestConsult(req.session.user, subject, req_subject, new Date(year, month, day, 0, 0, 0, 0), function () {
-        res.redirect('/dashboard');
+    if (new Date(date) > new Date(nowdate))
+        return res.status(400).json('Nevalidno vreme.');
+    storage.findSubjecById(subject, subject => {
+        if (!subject)
+            return res.status(400).json('Ne postoji predmet.');
+        storage.requestConsult(req.session.user, subject.id, req_subject, date, function () {
+            storage.findSubjectProfessor(subject.id, function (professor) {
+                synchro.io().sockets.in('professor-' + professor.id).emit('dashboard consult request created');
+                mailer.sendConsultRequestEmail(professor.email, subject.name, req_subject, date);
+                res.json(true);
+            });
+        });
     });
 }));
 
-//Ruta za brisanjezahteva
-routes.push(router.post('/request/delete', function (req, res) {
+//Ruta za brisanjezahteva od strane studenta
+routes.push(router.post('/consultrequest/delete', function (req, res) {
+    var subject = req.body.subject;
+
+    if (!subject)
+        return res.status(400).json('Prazno polje.');
+    if (!req.session.isLoged || req.session.user_type != 'student') {
+        return res.status(400).json('Nemate prava pristupa ovim podatcima');
+    }
+    storage.findSubjecById(subject, subject => {
+        if (!subject)
+            return res.status(400).json('Ne postoji predmet.');
+        storage.deleteConsultRequest(req.session.user.id, subject.id, function () {
+            synchro.io().sockets.in('professor-' + subject.professorId).emit('dashboard consult request deleted');
+            res.json(true);
+        });
+    }); 
+}));
+
+//Ruta za odbijanej zahteva za konsultaciju od strane profesora
+routes.push(router.post('/consultrequest/reject', function (req, res) {
     var student = req.body.student;
     var subject = req.body.subject;
 
-    if (!req.session.isLoged || req.session.user_type != 'student') {
-        res.redirect('/error');
+    if (!subject)
+        return res.status(400).json('Prazno polje.');
+    if (!req.session.isLoged || req.session.user_type != 'professor') {
+        return res.status(400).json('Nemate prava pristupa ovim podatcima');
     }
-    storage.deleteConsultRequest(student, subject, function () {
-        res.redirect('/dashboard');
+    storage.findSubjecById(subject, subject => {
+        if (!subject)
+            return res.status(400).json('Ne postoji predmet.');
+        storage.rejectedConsultRequest(student, subject.id, function () {
+            synchro.io().sockets.in('student-' + student).emit('dashboard consult request rejected');
+            res.json(true);
+        });
     });
 }));
 
-//Ruta za krejiranje nezahtevane konsultacije
-routes.push(router.post('/consult/createsingle', function (req, res) {
+//|--------------------------------------------------------------------------
+
+//Ruta za kreiranje  konsultacije od strane profesora
+routes.push(router.post('/consult/create', function (req, res) {
     var subject = req.body.subject;
     var cons_subject = req.body.cons_subject;
-    var day = req.body.day;
-    var month = req.body.month;
-    var year = req.body.year;
-    var hour = req.body.hour;
-    var minute = req.body.minute;
-    if (!req.session.isLoged || req.session.user_type == 'student') {
-        res.redirect('/error');
+    var date = req.body.sc_date;
+
+    var nowdate = new Date() + new Date().getTimezoneOffset() * 60000;
+
+    if (!subject || !cons_subject || !date)
+        return res.status(400).json('Prazno polje.');
+    if (!req.session.isLoged || req.session.user_type != 'professor') {
+        return res.status(400).json('Nemate prava pristupa ovim podatcima');
     }
-    storage.createConsult(subject, cons_subject, new Date(year, month, day, hour, minute, 0, 0),  function () {
-        res.redirect('/dashboard');
+    if (new Date(date) > new Date(nowdate))
+        return res.status(400).json('Nevalidno vreme.');
+    storage.findSubjecById(subject, subject => {
+        if (!subject)
+            return res.status(400).json('Ne postoji predmet.');
+        storage.createConsult(subject.id, cons_subject, date, function () {
+            synchro.io().sockets.in('subject-' + subject.id).emit('dasboard consult created');
+            schedule.newConsultNotification();
+            res.json(true);
+        });
     });
 }));
+
+//Ruta za kreiranje zahtevane konsultacije za profesora
+routes.push(router.post('/consult/createrequested', function (req, res) {
+    var subject = req.body.subject;
+    var student = req.body.student;
+    var cons_subject = req.body.cons_subject;
+    var date = req.body.sc_date;
+
+    var nowdate = new Date() + new Date().getTimezoneOffset() * 60000;
+
+    if (!subject || !cons_subject || !date || !student)
+        return res.status(400).json('Prazno polje.');
+    if (!req.session.isLoged || req.session.user_type != 'professor') {
+        return res.status(400).json('Nemate prava pristupa ovim podatcima');
+    }
+    if (new Date(date) > new Date(nowdate))
+        return res.status(400).json('Nevalidno vreme.');
+    storage.findSubjecById(subject, subject => {
+        if (!subject)
+            return res.status(400).json('Ne postoji predmet.');
+        models.dbmodels.ConsultRequest.findOne({ where: { studentId: student, subjectId: subject.id } }).then(request => {
+            if (!request)
+                return res.status(400).json('Ne postoji zahtev.');
+            else
+                request.update({ status: 'approved' }).then(() => {
+                    storage.createConsult(subject.id, cons_subject, date, function () {
+                        synchro.io().sockets.in('subject-' + subject.id).emit('dasboard consult created');
+                        schedule.newConsultNotification();
+                        res.json(true);
+                    });
+                });
+        });
+        
+    });
+}));
+
+//|--------------------------------------------------------------------------
+
 
 /*
 |--------------------------------------------------------------------------

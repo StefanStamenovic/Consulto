@@ -1,34 +1,14 @@
 ﻿<% include ../partials/head %>
+<script>
+    var userHash = '<%=model.userHash%>';
+    var userSubjects = [<%=model.userSubjectsIds %>];
+    var user_type = '<%=model.user_type%>';
+</script>
 <% if(model.user_type == "professor"){%>
     <div class="row">
-        <div class="col-md-3">
-            <!--Panel u kome su prikazani svi predmeti koje profesor drzi-->
-            <div class="panel panel-info">
-                <div class="panel-heading">Predmeti<a class="btn btn-primary btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="#addSubject">Dodajte novi predmet</a></div>
-                <div class="panel-body" style="overflow:auto;height: 35%;padding: 0px;">
-                    <ul class="list-group">
-                        <% model.userSubjects.forEach(function(subject){%>
-                        <li class="list-group-item clearfix" <%if(subject.status != true){%>style="background-color: whitesmoke;"<%}%>>
-                                <div class="col-lg-12 clearfix" style="margin-bottom:10px;padding: 0px">
-                                    <h4 class="pull-left" style="margin-bottom:auto"><%= subject.name%></h4>
-                                </div>
-                                <p class="pull-left" style="margin-left: 10px">Na <strong><% switch(subject.year){ case 1 :%>prvoj<%break;case 2:%>drugoj<%break;case 3:%>trecoj<%break;case 4:%>cetvrtoj<%break;case 5:%>petoj<%break;case 6:%>sestoj<%break;}%></strong> godini</p>
-                                <%if(subject.status == true){%>
-                                    <a class="btn btn-default btn-lg pull-right subject_off" style="padding: 3px;" data-toggle="modal" href="" value="<%=subject.id%>">Ugasi</a>
-                                <%}else{%>
-                                    <a class="btn btn-default btn-lg pull-right subject_on" style="padding: 3px;" data-toggle="modal" href="" value="<%=subject.id%>">Upali</a>
-                                <%}%>
-                            </li>
-                        <%});%>
-                    </ul>
-                    <% if (model.userSubjects.length < 1) {%>
-                    <h4 class="text-muted" style="text-align:center">Ne drzite ni jedan predmet.</h4>
-                    <%}%>
-                </div>
-            </div>
-        </div>
+        <div id="error_msg" style="padding-left: 0px; width: 75%" class="row"></div>
         <!--Levi panel-->
-        <div class="col-md-6">
+        <div class="col-md-8">
             <ul class="nav nav-tabs">
                 <li class="active"><a href="#consultview" data-toggle="tab" aria-expanded="true">Pregled konsultacija</a></li>
                 <li class=""><a href="#consulthistory" data-toggle="tab" aria-expanded="false">Istorija konsultacija</a></li>
@@ -55,8 +35,8 @@
                                     <%}%>
                                 </a>
                                      <div id="c<%= subject.id %>" class="collapse" style="background-color: whitesmoke;padding-bottom:1px">
-                                    <div class="panel panel-primary" style=" margin-bottom: 0px;border-top-width: 5px;margin-left: 10px;margin-right: 10px;">
-                                        <div class="panel-heading" style="background-color: rgb(117, 202, 235);">
+                                    <div class="panel panel-default" style=" margin-bottom: 0px;border-top-width: 5px;margin-left: 10px;margin-right: 10px;">
+                                        <div class="panel-heading">
                                             <h3 class="panel-title">Zahtevi za konsultaciju</h3>
                                         </div>
                                         <div class="panel-body" style="padding: 0px;">
@@ -65,11 +45,11 @@
                                             <ul class="list-group">
                                                 <%subject.request.forEach(request => {%>
                                                     <%if(request.status == 'notApproved'){%>
-                                                        <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
+                                                        <li class="list-group-item clearfix" style=";border-radius: 0px">
                                                             <p class="pull-left" style="margin-left: 10px;margin-bottom:auto"><%= request.student.name%></p>
                                                             <p class="pull-left" style="margin-left: 50px;margin-bottom:auto"><%= request.subject%></p>
-                                                            <a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="">Zakazi</a>
-                                                            <a class="btn btn-default btn-lg pull-right" style="margin-right: 10px;padding: 3px;" data-toggle="modal" href="">Odbij zahtev</a>
+                                                            <a value='{"subject": "<%=subject.id%>", "student": "<%=request.student.id%>", "studentname": "<%=request.student.name%>", "reqsubject": "<%= request.subject%>"}' class="btn btn-default btn-lg pull-right consult-createrequested-button" style="padding: 3px;" data-toggle="modal" href="">Zakazi</a>
+                                                            <a value='{"subject": "<%=subject.id%>", "student": "<%=request.student.id%>"}' class="btn btn-default btn-lg pull-right request-delete-button" style="margin-right: 10px;padding: 3px;" data-toggle="modal" href="">Odbij zahtev</a>
                                                             <p class="pull-right" style="margin-right: 10px;margin-bottom:auto"><strong><%= request.time.getUTCDate() + "/" + (request.time.getUTCMonth()+1) + "/" + request.time.getUTCFullYear()%></strong></p>
                                                         </li>
                                                     <%}%>
@@ -79,28 +59,33 @@
                                             <h4 class="text-muted" style="text-align:center;">Nemate zahteva za konsultaciju.</h4>
                                             <%}%>
                                             <div class="clearfix" style="margin: 5px">
-                                                <button type="submit" class="btn btn-default pull-right consult_create" value="<%=subject.id%>">Zakazite ne zahtevanu konsultaciju</button>
+                                                <button type="submit" class="btn btn-default pull-right consult-create-button" value="<%=subject.id%>">Zakazite ne zahtevanu konsultaciju</button>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="panel panel-info" style="margin:10px;">
-                                        <div class="panel-heading">
+                                    <div class="panel panel-default" style="margin:10px;">
+                                        <div class="panel-heading" style="border-top: 1px solid #e7e7e7;">
                                             <h3 class="panel-title">Konsultacije</h3>
                                         </div>
                                         <div class="panel-body" style="padding: 0px;">
-                                            <%var tcount = 0; subject.consults.forEach(consult => { if(consult.e_time == null){ tcount++;}});%>
-                                            <% if(tcount > 0){%>
+                                            <% if(ccount > 0){%>
                                             <ul class="list-group">
                                                 <%subject.consults.forEach(consult => {%>
-                                                <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px">
-                                                    <div class="col-lg-12">
-                                                        <h4 style="margin-bottom:auto">Tema: <strong><%= consult.subject%></strong></h4>
-                                                    </div>
-                                                    <p class="pull-left" style="margin-left: 20px;margin-top:10px">Vreme pocetka: <strong><%= consult.sc_time.getUTCHours() + ":" + consult.sc_time.getUTCMinutes() + " " + consult.sc_time.getUTCDate() + "/" + (consult.sc_time.getUTCMonth()+1) + "/" + consult.sc_time.getUTCFullYear()%></strong></p>
-                                                    <%if(consult.sc_time < (new Date()) && consult.status == false) {%>
-                                                        <a class="btn btn-default btn-lg pull-right start_button" style="padding: 3px;" data-toggle="modal" href="" value="<%=consult.id%>">Pocni konsultaciju</a>
+                                                    <%if(consult.e_time == null){%>
+                                                        <li class="list-group-item clearfix" style="border-radius: 0px">
+                                                            <div class="col-lg-12">
+                                                                <h4 style="margin-bottom:auto">Tema: <strong><%= consult.subject%></strong></h4>
+                                                            </div>
+                                                            <p class="pull-left" style="margin-left: 20px;margin-top:10px">Vreme pocetka: <strong><%= consult.sc_time.getHours() + ":" + consult.sc_time.getMinutes() + " " + consult.sc_time.getUTCDate() + "/" + (consult.sc_time.getUTCMonth()+1) + "/" + consult.sc_time.getUTCFullYear()%></strong></p>
+                                                            <%if(consult.sc_time < (new Date())) {%>
+                                                            <%if(consult.s_time){%>
+                                                                <a class="btn btn-default btn-lg pull-right start_button" style="padding: 3px;" data-toggle="modal" href="" value="<%=consult.id%>">Nastavi konsultaciju</a>
+                                                            <%}else{%>
+                                                                <a class="btn btn-default btn-lg pull-right start_button" style="padding: 3px;" data-toggle="modal" href="" value="<%=consult.id%>">Pocni konsultaciju</a>
+                                                            <%}%>
+                                                            <%}%>
+                                                        </li>
                                                     <%}%>
-                                                </li>
                                                 <%});%>
                                             </ul>
                                             <%}else{%>
@@ -134,9 +119,9 @@
                                             <div class="col-lg-12">
                                                 <h4 style="margin-bottom:auto">Tema: <strong><%= consult.subject%></strong></h4>
                                             </div>
-                                            <p class="pull-left" style="margin-left: 20px;margin-top:10px">Vreme pocetka: <strong><%= consult.s_time.getHours() + ":" + consult.s_time.getMinutes() + " " + consult.s_time.getUTCDate() + "/" + (consult.s_time.getUTCMonth()+1) + "/" + consult.s_time.getUTCFullYear()%></strong></p>
+                                            <p class="pull-left" style="margin-left: 20px;margin-top:10px">Vreme pocetka: <strong><%= consult.s_time.getUTCHours() + ":" + consult.s_time.getUTCMinutes() + " " + consult.s_time.getUTCDate() + "/" + (consult.s_time.getUTCMonth()+1) + "/" + consult.s_time.getUTCFullYear()%></strong></p>
                                             <a class="btn btn-default btn-lg pull-right consult_view" style="padding: 3px;margin-top:10px" data-toggle="modal" href="" value="<%= consult.id%>" name="<%=subject.id%>">Pogledaj konsultaciju</a>
-                                            <p class="pull-right" style="margin-right: 20px;margin-top:10px">Vreme kraja: <strong><%= consult.e_time.getHours() + ":" + consult.e_time.getMinutes() + " " + consult.e_time.getUTCDate() + "/" + (consult.e_time.getUTCMonth()+1) + "/" + consult.e_time.getUTCFullYear()%></strong></p>
+                                            <p class="pull-right" style="margin-right: 20px;margin-top:10px">Vreme kraja: <strong><%= consult.e_time.getUTCHours() + ":" + consult.e_time.getUTCMinutes() + " " + consult.e_time.getUTCDate() + "/" + (consult.e_time.getUTCMonth()+1) + "/" + consult.e_time.getUTCFullYear()%></strong></p>
                                         </li>
                                         <%}%>
                                         <%});%>
@@ -156,23 +141,45 @@
             </div>
         </div>
         <!--Desni panel-->
-        <div class="col-md-3"> 
+        <div class="col-md-4">
+            <!--Panel u kome su prikazani svi predmeti koje profesor drzi-->
+            <div class="panel panel-default">
+                <div style="border-radius: 0px;border-left: 5px solid #158cba;" class="panel-heading">Predmeti<a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="#subject-create">Dodajte novi predmet</a></div>
+                <div class="panel-body" style="overflow:auto;height: 35%;padding: 0px;">
+                    <ul class="list-group">
+                        <% model.userSubjects.forEach(function(subject){%>
+                        <li class="list-group-item clearfix" <%if(subject.status != true){%>style="background-color: whitesmoke;"<%}%>>
+                                <h4 value="<%= subject.id%>" class="pull-left select-subject-button" style="width: 80%;margin-bottom:auto;margin-top: auto;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;cursor: pointer" data-toggle="tooltip" data-placement="top" title="<%= subject.name%>"><%= subject.name%></h4>
+                                <%if(subject.status == true){%>
+                                    <a class="btn btn-default btn-lg pull-right subject-deactivate" style="padding: 3px;" value="<%=subject.id%>">Ugasi</a>
+                                <%}else{%>
+                                    <a class="btn btn-primary btn-lg pull-right subject-activate" style="padding: 3px;" value="<%=subject.id%>">Upali</a>
+                                <%}%>
+                            </li>
+                        <%});%>
+                    </ul>
+                    <% if (model.userSubjects.length < 1) {%>
+                    <h4 class="text-muted" style="text-align:center">Ne drzite ni jedan predmet.</h4>
+                    <%}%>
+                </div>
+            </div>
             <!--Panel u kome su prikazane konsultacije koje su spremene za pocetak-->
-            <div class="panel panel-info">
-                <div class="panel-heading">Konsultacije spremne za pocetak</div>
+            <div class="panel panel-default">
+                <div style="border-radius: 0px;border-left: 5px solid #158cba;" class="panel-heading">Konsultacije spremne za pocetak</div>
                 <div class="panel-body" style="overflow:auto;height: 28%;padding: 0px;">
                     <ul class="list-group">
+
                         <%var lcount = 0; model.userSubjects.forEach (function(subject){%>
                             <%if(subject.status == true){%>
-                                <%subject.consults.forEach(consult => { if(consult.e_time == null && consult.status == false && consult.sc_time <= (new Date())){ lcount++;}});%>
+                                <%subject.consults.forEach(consult => { if(consult.e_time == null && !consult.s_time && consult.sc_time < (new Date())){ lcount++;}});%>
                                 <%subject.consults.forEach(consult => {%>
-                                    <% if(consult.e_time == null && consult.status == false && consult.s_time <= (new Date())){%>
-                                        <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px;padding-bottom: 0px;padding-top: 0px">
+                                    <% if(consult.e_time == null && !consult.s_time && consult.sc_time < (new Date())){%>
+                                        <li class="list-group-item clearfix" style="border-radius: 0px;padding-bottom: 0px;padding-top: 0px">
                                             <div class="col-lg-12 clearfix" style="margin-bottom:10px;padding: 0px">
                                                 <h4 class="pull-left" style="margin-bottom:auto">Tema: <strong><%= consult.subject%></strong></h4>
                                             </div>
                                             <p class="pull-left" style="margin-left: 10px">Predmet: <strong><%= subject.name%></strong></p>
-                                            <a class="btn btn-default btn-lg pull-right start_button" style="padding: 3px;" data-toggle="modal" href="" value ="<%=consult.id%>">Pocni konsultaciju</a>
+                                            <a class="btn btn-default btn-lg pull-right start_button" style="padding: 3px;" data-toggle="modal" href="" value ="<%=consult.id%>">Pocni</a>
                                         </li>
                                     <%}%>
                                 <%});%>
@@ -186,7 +193,7 @@
             </div>
         </div>
 
-        <div class="modal" id="addSubject">
+        <div class="modal" id="subject-create">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -194,19 +201,19 @@
                         <h4 class="modal-title">Krejiranje predmeta</h4>
                     </div>
                     <div class="modal-body">
-                        <form class="form-horizontal" action="/subject/create" method="post">
+                        <form class="form-horizontal" action="javascript:void(0);">
                             <fieldset>
                                 <div class="form-group">
                                     <div class="row"  style="margin-bottom: 10px">
                                         <label class="col-lg-4 control-label">Ime predmeta:</label>
                                         <div class="col-lg-6">
-                                            <input type="text" class="form-control" name="name" placeholder="Ime predmeta">
+                                            <input type="text" class="form-control" id="subject-create-subject" placeholder="Ime predmeta">
                                         </div>
                                     </div>
                                     <div class="row">
                                         <label class="col-lg-4 control-label">Godina:</label>
                                         <div class="col-lg-2">
-                                            <select class="form-control" name="year">
+                                            <select class="form-control" id="subject-create-year">
                                                 <% for(var i = 1; i < 6;i++){%>
                                                 <option><%= i %></option>
                                                 <%}%>
@@ -216,7 +223,7 @@
                                 </div>
                                 <div class="form-group">
                                     <div class="col-lg-10 col-lg-offset-2">
-                                        <button type="submit" class="btn btn-primary pull-right">Krejirajte predmet</button>
+                                        <button id="subject-create-submit" type="submit" class="btn btn-primary pull-right">Kreirajte predmet</button>
                                     </div>
                                 </div>
                             </fieldset>
@@ -225,7 +232,7 @@
                 </div>
             </div>
         </div>
-        <div class="modal" id="createSingleConsult">
+        <div class="modal" id="consult-create">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -233,62 +240,34 @@
                             <h4 class="modal-title">Zakazivanje ne zahtevane konsultacije</h4>
                         </div>
                         <div class="modal-body">
-                            <form class="form-horizontal" action="/consult/createsingle" method="post">
+                            <form class="form-horizontal" action="javascript:void(0);">
                                 <fieldset>
                                     <div class="form-group">
-                                        <input type="hidden" id="request_subject" name="subject" value="">
-                                        <label class="col-lg-2 control-label" style="margin-top: 20px">Tema:</label>
-                                        <div class="col-lg-10">
-                                            <input type="text" class="form-control" name="cons_subject" placeholder="Tema" style="margin-top: 20px">
+                                        <div class="col-lg-8">
+                                            <input type="hidden" class="form-control" id="consult-create-subjectval">
                                         </div>
-                                        <label class="col-lg-2 control-label" style="margin-top: 40px">Vreme:</label>
-                                        <div class="col-lg-10" style="margin-top: 20px">
-                                            <%var date = new Date();%>
-                                            <div class="col-lg-2">
-                                                <label>Sat</label>
-                                                <select class="form-control" id="req_date_hours" name="hour" style="width: 65px">
-                                                    <% for(var i = 0; i< 24; i++){%>
-                                                    <option><%= i %></option>
-                                                    <%}%>
-                                                </select>
-                                            </div>
-                                            <div class="col-lg-2">
-                                                <label>Minut</label>
-                                                <select class="form-control" id="req_date_minutes" name="minute" style="width: 65px">
-                                                    <% for(var i = 0; i< 60; i++){%>
-                                                    <option><%= i %></option>
-                                                    <%}%>
-                                                </select>
-                                            </div>
-                                            <div class="col-lg-2">
-                                                <label>Dan</label>
-                                                <select class="form-control" id="req_date_days" name="day" style="width: 65px">
-                                                    <% for(var i = 1; i< 32; i++){%>
-                                                    <option><%= i %></option>
-                                                    <%}%>
-                                                </select>
-                                            </div>
-                                            <div class="col-lg-2">
-                                                <label>Mesec</label>
-                                                <select class="form-control" id="req_date_months" name="month" style="width: 65px">
-                                                    <% for(var i = 1; i< 13; i++){%>
-                                                    <option><%= i %></option>
-                                                    <%}%>
-                                                </select>
-                                            </div>
-                                            <div class="col-lg-4">
-                                                <label>Godina</label>
-                                                <select class="form-control" name="year" style="width: 80px">
-                                                    <% for(var i = date.getFullYear(); i< date.getFullYear() + 2; i++){%>
-                                                    <option><%= i %></option>
-                                                    <%}%>
-                                                </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-2 control-label">Tema</label>
+                                        <div class="col-lg-8">
+                                            <input type="text" class="form-control" id="consult-create-subject" placeholder="Tema" >
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-2 control-label" style="margin-top: 20px">Vreme:</label>
+                                        <div class="col-lg-8">
+                                            <div class='input-group date' id='datetimepicker-create' style="margin-top: 20px">
+                                                <input type='text' class="form-control" />
+                                                <span class="input-group-addon">
+                                                    <span class="glyphicon glyphicon-calendar">
+                                                    </span>
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <div class="col-lg-10 col-lg-offset-2">
-                                            <button id="requestsingle_button" type="submit" class="btn btn-primary pull-right">Zakazi konsultaciju</button>
+                                            <button id="create-constult-submit" type="submit" class="btn btn-primary pull-right">Zakazi konsultaciju</button>
                                         </div>
                                     </div>
                                 </fieldset>
@@ -297,10 +276,129 @@
                     </div>
                 </div>
             </div>
+        <div class="modal" id="consult-create-requested">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Zakazivanje zahtevane konsultacije</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal" action="javascript:void(0);">
+                            <fieldset>
+                                <div class="form-group">
+                                    <div class="col-lg-8">
+                                        <input type="hidden" class="form-control" id="consult-create-requested-request">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-2 control-label">Zahteva:</label>
+                                    <label id="consult-create-requested-studentname" class="col-lg- control-label"></label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-2 control-label">Tema:</label>
+                                    <label id="consult-create-requested-reqsubject" class="col-lg- control-label"></label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-lg-2 control-label" style="margin-top: 20px">Vreme:</label>
+                                    <div class="col-lg-8">
+                                        <div class='input-group date' id='datetimepicker-create-requested' style="margin-top: 20px">
+                                            <input type='text' class="form-control" />
+                                            <span class="input-group-addon">
+                                                <span class="glyphicon glyphicon-calendar">
+                                                </span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-lg-10 col-lg-offset-2">
+                                        <button id="create-constultrequested-submit" type="submit" class="btn btn-primary pull-right">Zakazi konsultaciju</button>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal" id="consult-postponed">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Zakazivanje ne zahtevane konsultacije</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-horizontal" action="/consult/createsingle" method="post">
+                            <fieldset>
+                                <div class="form-group">
+                                    <input type="hidden" id="request_subject" name="subject" value="">
+                                    <label class="col-lg-2 control-label" style="margin-top: 20px">Tema:</label>
+                                    <div class="col-lg-10">
+                                        <input type="text" class="form-control" name="cons_subject" placeholder="Tema" style="margin-top: 20px">
+                                    </div>
+                                    <label class="col-lg-2 control-label" style="margin-top: 40px">Vreme:</label>
+                                    <div class="col-lg-10" style="margin-top: 20px">
+                                        <%var date = new Date();%>
+                                        <div class="col-lg-2">
+                                            <label>Sat</label>
+                                            <select class="form-control" id="req_date_hours" name="hour" style="width: 65px">
+                                                <% for(var i = 0; i< 24; i++){%>
+                                                <option><%= i %></option>
+                                                <%}%>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <label>Minut</label>
+                                            <select class="form-control" id="req_date_minutes" name="minute" style="width: 65px">
+                                                <% for(var i = 0; i< 60; i++){%>
+                                                <option><%= i %></option>
+                                                <%}%>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <label>Dan</label>
+                                            <select class="form-control" id="req_date_days" name="day" style="width: 65px">
+                                                <% for(var i = 1; i< 32; i++){%>
+                                                <option><%= i %></option>
+                                                <%}%>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-2">
+                                            <label>Mesec</label>
+                                            <select class="form-control" id="req_date_months" name="month" style="width: 65px">
+                                                <% for(var i = 1; i< 13; i++){%>
+                                                <option><%= i %></option>
+                                                <%}%>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <label>Godina</label>
+                                            <select class="form-control" name="year" style="width: 80px">
+                                                <% for(var i = date.getFullYear(); i< date.getFullYear() + 2; i++){%>
+                                                <option><%= i %></option>
+                                                <%}%>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-lg-10 col-lg-offset-2">
+                                        <button id="requestsingle_button" type="submit" class="btn btn-primary pull-right">Zakazi konsultaciju</button>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 <%} else if(model.user_type == "student"){%>
     <div class="row">
-        <!--Lavi panel-->
+        <div id="error_msg" style="padding-left: 0px; width: 75%" class="row"></div>
+        <!--Levi panel-->
         <div class="col-md-8">
             <ul class="nav nav-tabs">
                 <li class="active"><a href="#consultview" data-toggle="tab" aria-expanded="true">Pregled predmeta</a></li>
@@ -343,11 +441,11 @@
                                                                     <div class="col-lg-12">
                                                                         <h4 style="margin-bottom:auto">Tema: <strong><%= consult.subject%></strong></h4>
                                                                     </div>
-                                                                    <p class="label <% if(consult.status){%>label-success<%}else{%>label-warning<%}%> pull-left" style="margin-left: 20px;margin-bottom:auto;margin-top: 10px">Status: <strong><% if(consult.status){%>Konsultacija u toku<%}else{%>Nije jos pocela<%}%></strong></p>
-                                                                    <% if(consult.e_time == null && consult.status == true){%>
+                                                                    <p class="label <% if(consult.status){%>label-success<%}else{%>label-warning<%}%> pull-left" style="margin-left: 20px;margin-bottom:auto;margin-top: 10px">Status: <strong><% if(consult.s_time){%>Konsultacija u toku<%}else{%>Nije jos pocela<%}%></strong></p>
+                                                                    <% if(consult.e_time == null && consult.s_time){%>
                                                                         <a class="btn btn-primary btn-lg pull-right start_button" style="padding: 3px;" data-toggle="modal" href="" value="<%= consult.id%>" name="<%=subject.id%>">Pridruzi se</a>
                                                                     <%}%>
-                                                                    <p class="pull-right" style="margin-right: 10px;margin-bottom:auto">Zakazano vreme pocetka: <strong><%= consult.sc_time.getUTCHours() + ":" + consult.sc_time.getMinutes() + " " + consult.sc_time.getUTCDate() + "/" + (consult.sc_time.getUTCMonth()+1) + "/" + consult.sc_time.getUTCFullYear()%></strong></p>
+                                                                    <p class="pull-right" style="margin-right: 10px;margin-bottom:auto">Zakazano vreme pocetka: <strong><%= consult.sc_time.getHours() + ":" + consult.sc_time.getMinutes() + " " + consult.sc_time.getUTCDate() + "/" + (consult.sc_time.getUTCMonth()+1) + "/" + consult.sc_time.getUTCFullYear()%></strong></p>
                                                                 </li>
                                                             <%}%>
                                                         <%});%>
@@ -369,7 +467,7 @@
                                                             <h4 class="pull-left" style="margin-bottom:auto">Tema: <strong><%= subject.request.subject%></strong></h4>
                                                         </div>
                                                         <p class="label <% switch(subject.request.status){ case 'approved' :%>label-success<%break;case 'rejected':%>label-danger<%break;case 'notApproved':%>label-info<%break;}%> pull-left" style="margin-left: 20px;margin-bottom:auto;margin-top: 10px">Status: <strong><% switch(subject.request.status){ case 'approved' :%>Odobrena<%break;case 'rejected':%>Odbijena<%break;case 'notApproved':%>Na cenkanju<%break;}%></strong></p>
-                                                        <a class="btn btn-danger btn-lg pull-right request_delete" style="padding: 3px;margin-top: 10px" data-toggle="modal" href="" value="<%=subject.id%>" name="<%=model.user.id%>">Obrisi zahtev</a>
+                                                        <a class="btn btn-danger btn-lg pull-right request-delete" style="padding: 3px;margin-top: 10px" data-toggle="modal" href="" value="<%=subject.id%>" name="<%=model.user.id%>">Obrisi zahtev</a>
                                                         <p class="pull-right" style="margin-right: 10px;margin-bottom:10px;margin-top: 10px">Zahtev za odrzavanje datuma: <strong><%= subject.request.time.getUTCDate() + "/" + (subject.request.time.getUTCMonth()+1) + "/" + subject.request.time.getUTCFullYear()%></strong></p>
                                                     </li>
                                                 </ul>
@@ -380,7 +478,7 @@
                                         </div>
                                         <%if(subject.request == null){%>
                                             <div class="clearfix" style="margin: 5px;">
-                                                <button type="submit" class="btn btn-primary pull-right requestButton" style="margin-right: 10px;margin-bottom:10px" value="<%= subject.id%>">Zahtevaj konsultaciju</button>
+                                                <button type="submit" class="btn btn-primary pull-right consult-request-button" style="margin-right: 10px;margin-bottom:10px" data-toggle="modal" href="#consult-request" value="<%= subject.id%>">Zahtevaj konsultaciju</button>
                                             </div>
                                         <%}%>
                                     </div>
@@ -433,18 +531,15 @@
         <!--Desni paneli-->
         <div class="col-md-4">
             <!--Panel za prikaz predmeta koje je student izabarao-->
-            <div class="panel panel-info">
-                <div class="panel-heading">Predmeti<a class="btn btn-primary btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="#addSubject">Prijavite se na predmet</a></div>
+            <div class="panel panel-default">
+                <div class="panel-heading" style="border-radius: 0px;border-left: 5px solid #75caeb;">Predmeti<a class="btn btn-default btn-lg pull-right" style="padding: 3px;" data-toggle="modal" href="#subject-select">Prijavite se na predmet</a></div>
                 <div class="panel-body" style="overflow:auto;height: 34%;padding: 0px;">
                     <ul class="list-group">
                         <% model.userSubjects.forEach(function(subject){%>
                             <%if(subject.status == true){%>
                                 <li class="list-group-item clearfix">
-                                    <div class="col-lg-12 clearfix" style="margin-bottom:10px;padding: 0px">
-                                        <h4 class="pull-left" style="margin-bottom:auto"><%= subject.name%></h4>
-                                    </div>
-                                    <p class="pull-left" style="margin-left: 10px">Prof: <strong><%= subject.PROFESSOR.name%></strong></p>
-                                    <a class="btn btn-default btn-lg pull-right deselect_button" style="padding: 3px;" data-toggle="modal" href="" value="<%=subject.id%>">Odjavi</a>
+                                    <h4 class="pull-left" style="width: 80%;margin-bottom:auto;margin-top: auto;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;" data-toggle="tooltip" data-placement="top" title="<%= subject.name%>"><%= subject.name%></h4>
+                                    <a class="btn btn-default btn-lg pull-right subject-deselect" style="padding: 3px;" value="<%=subject.id%>">Odjavi</a>
                                 </li>
                             <%}%>
                         <%});%>
@@ -455,15 +550,15 @@
                 </div>
             </div>
             <!--Panel za konsultacije koje su trenutno u toku i koje je profesor vec pokrenuo-->
-            <div class="panel panel-info">
-                <div class="panel-heading">Konsultacije koje su trenutno u toku</div>
-                <div class="panel-body" style="overflow:auto;height: 28%;padding: 0px;">
+            <div class="panel panel-default">
+                <div class="panel-heading" style="border-radius: 0px;border-left: 5px solid #75caeb;">Konsultacije koje su trenutno u toku</div>
+                <div class="panel-body" style="overflow:auto;height: 28%;padding: 0px;" id="started-consults">
                         <ul class="list-group">
                             <%var mcount = 0; model.userSubjects.forEach (function(subject){%>
                                 <%if(subject.status == true){%>
-                                    <%subject.consults.forEach(consult => { if(consult.e_time == null && consult.status == true){ mcount++;}});%>
+                                    <%subject.consults.forEach(consult => { if(consult.e_time == null && consult.s_time != null){ mcount++;}});%>
                                     <%subject.consults.forEach(consult => {%>
-                                        <%if (consult.e_time == null && consult.status == true){%>
+                                        <%if (consult.e_time == null && consult.s_time != null){%>
                                             <li class="list-group-item clearfix" style="background-color: #f5f5f5;border-radius: 0px;padding-bottom: 0px;padding-top: 0px">
                                                 <div class="col-lg-12 clearfix" style="margin-bottom:10px;padding: 0px">
                                                     <h4 class="pull-left" style="margin-bottom:auto">Tema: <strong><%= consult.subject%></strong></h4>
@@ -483,7 +578,7 @@
             </div>
         </div>
 
-        <div class="modal" id="addSubject">
+        <div class="modal" id="subject-select">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -497,13 +592,13 @@
                     <div class="modal-body">
                     <%if(contains == true || contains1 == true){%>
                         <% if(contains == true){%>
-                        <form class="form-horizontal" action="/subject/select" method="post">
+                        <form class="form-horizontal" action="javascript:void(0);">
                             <fieldset>
                                 <div class="form-group">
                                     <div class="row" style="margin-bottom: 10px">
-                                        <label for="select" class="col-lg-4 control-label">Predmeti na <%= %> godini:</label>
+                                        <label for="select" class="col-lg-4 control-label">Predmeti sa vase godine:</label>
                                         <div class="col-lg-6">
-                                            <select class="form-control" id="select" name="subject">
+                                            <select class="form-control" id="subject-select-onyear" name="subject">
                                                 <% model.allSubjects.forEach(function(subject){%>
                                                 <% if(subject.year == model.user.year && model.userSubjects.filter(fsubject => {return fsubject.id == subject.id}).length == 0){%>
                                                 <option value="<%= subject.id%>"><%= subject.name %></option>
@@ -514,20 +609,20 @@
                                 </div>
                                 <div class="form-group">
                                     <div class="col-lg-10 col-lg-offset-2">
-                                        <button type="submit" class="btn btn-primary pull-right">Prijavite se na predmet</button>
+                                        <button id="subject-select-onyear-submit" type="submit" class="btn btn-primary pull-right">Prijavite se na predmet</button>
                                     </div>
                                 </div>
                             </fieldset>
                         </form>
                         <%}%>
                         <% if(contains1 == true){%>
-                        <form class="form-horizontal" action="/subject/select" method="post">
+                        <form class="form-horizontal" action="javascript:void(0);">
                             <fieldset>
                                 <div class="form-group">
                                     <div class="row">
                                         <label class="col-lg-4 control-label">Ostali predmeti:</label>
                                         <div class="col-lg-6">
-                                            <select class="form-control" name="subject">
+                                            <select class="form-control" id="subject-select-val" name="subject">
                                                 <% model.allSubjects.forEach(function(subject){%>
                                                 <% if(subject.year != model.user.year && model.userSubjects.filter(fsubject => {return fsubject.id == subject.id}).length == 0){%>
                                                 <option value="<%= subject.id%>"><%= subject.name %></option>
@@ -538,7 +633,7 @@
                                 </div>
                                 <div class="form-group">
                                     <div class="col-lg-10 col-lg-offset-2">
-                                        <button type="submit" class="btn btn-primary pull-right">Prijavite se na predmet</button>
+                                        <button id="subject-select-submit" type="submit" class="btn btn-primary pull-right">Prijavite se na predmet</button>
                                     </div>
                                 </div>
                             </fieldset>
@@ -551,7 +646,7 @@
                 </div>
             </div>
         </div>
-        <div class="modal" id="makeRequest">
+        <div class="modal" id="consult-request">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -559,46 +654,34 @@
                             <h4 class="modal-title">Zahtev za konsultaciju</h4>
                         </div>
                         <div class="modal-body">
-                            <form class="form-horizontal" action="/subject/request" method="post">
+                            <form class="form-horizontal" action="javascript:void(0);">
                                 <fieldset>
                                     <div class="form-group">
-                                        <input type="hidden" id="request_subject" name="subject" value="">
-                                        <label class="col-lg-2 control-label" style="margin-top: 20px">Tema</label>
-                                        <div class="col-lg-10">
-                                            <input type="text" class="form-control" name="req_subject" placeholder="Tema" style="margin-top: 20px">
+                                        <div class="col-lg-8">
+                                            <input type="hidden" class="form-control" id="consult-request-subjectval">
                                         </div>
-                                        <label class="col-lg-2 control-label"  style="margin-top: 40px">Vreme:</label>
-                                        <div class="col-lg-6" style="margin-top: 20px">
-                                            <%var date = new Date();%>
-                                            <div class="col-lg-4">
-                                                <label>Dan</label>
-                                                <select class="form-control" id="req_date_days" name="day" style="width: 65px">
-                                                    <% for(var i = 1; i< 32; i++){%>
-                                                    <option><%= i %></option>
-                                                    <%}%>
-                                                </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-2 control-label" style="margin-top: 20px">Tema</label>
+                                        <div class="col-lg-8">
+                                            <input type="text" class="form-control" id="consult-request-subject" placeholder="Tema" style="margin-top: 20px">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-lg-2 control-label" style="margin-top: 20px">Vreme:</label>
+                                        <div class="col-lg-8">
+                                            <div class='input-group date' id='datetimepicker-request' style="margin-top: 20px">
+                                                <input type='text' class="form-control" />
+                                                <span class="input-group-addon">
+                                                    <span class="glyphicon glyphicon-calendar">
+                                                    </span>
+                                                </span>
                                             </div>
-                                            <div class="col-lg-4">
-                                                <label>Mesec</label>
-                                                <select class="form-control" id="req_date_months" name="month" style="width: 65px">
-                                                    <% for(var i = 1; i< 13; i++){%>
-                                                        <option><%= i %></option>
-                                                    <%}%>
-                                                </select>
-                                            </div>
-                                            <div class="col-lg-4">
-                                                <label>Godina</label>
-                                                <select class="form-control" name="year" style="width: 80px">
-                                                    <% for(var i = date.getFullYear(); i< date.getFullYear() + 2; i++){%>
-                                                    <option><%= i %></option>
-                                                    <%}%>
-                                                </select>
-                                            </div>
-                                         </div>
+                                        </div>
                                     </div>
                                     <div class="form-group">
                                         <div class="col-lg-10 col-lg-offset-2">
-                                            <button id="request_button" type="submit" class="btn btn-primary pull-right">Posaljite zahtev</button>
+                                            <button id="request-submit" type="submit" class="btn btn-primary pull-right">Posaljite zahtev</button>
                                         </div>
                                     </div>
                                 </fieldset>

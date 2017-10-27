@@ -1,7 +1,8 @@
 ﻿var fs = require("fs");
 var path = require("path");
 var Sequelize = require('sequelize');
-6
+const Op = Sequelize.Op;
+
 var config = require('config');
 var dbconfig = config.get('config.dbconfig');
 var sequelize = new Sequelize(dbconfig.dbname, dbconfig.username, dbconfig.password , {
@@ -219,12 +220,21 @@ var Storage = function () {
     }
 
     //Brise sve korisnike koji nisu potvrdili svoj status u roku od 24h 
-    this.deleteUnconfirmedUsers = function () {
-        //TODO: zavrsi
+    this.deleteUnconfirmedUsers = function (callback) {
+        //Vreme pre 24 sata
+        var date = new Date(new Date().toString() + sequelize.options.timezone) - 24 * 60 * 60 * 1000;
+        var date = new Date(date);
+        models.dbmodels.Professor.destroy({ where: { createdAt: { [Op.lt]: date, confirmed: false} } }).then(function () {
+            models.dbmodels.Student.destroy({ where: { createdAt: { [Op.lt]: date, confirmed: false } } }).then(function () {
+                callback();
+            });
+        });
     }
     //Uklanja zabranjeni datum za profesora
     this.deleteBlockedDate = function (professor, date, callback) {
-        //TODO: zavrsi
+        models.dbmodels.BlockedDates.destroy({ where: {professorId: professor, date: date}}).then(function () {
+            callback();
+        });
     }
     /*
     |--------------------------------------------------------------------------
@@ -248,6 +258,20 @@ var Storage = function () {
         });
     }
 
+    //Nalazi predmet po id-u
+    this.findSubjecById = function (subject, callback) {
+        models.dbmodels.Subject.findById(subject).then(subject => {
+            callback(subject);
+        });
+    }
+    //Nalazi profesora za studenta
+    this.findSubjectProfessor = function (subject, callback) {
+        models.dbmodels.Subject.findById(subject).then(subject => {
+            models.dbmodels.Professor.findById(subject.professorId).then(professor => {
+                callback(professor);
+            });
+        });
+    }
     //Nalazi predmete za profesora
     this.findProfessorSubjects = function (professor, callback) {
         models.dbmodels.Professor.findById(professor.id).then(professor => {
@@ -425,6 +449,16 @@ var Storage = function () {
             });
         });
     }
+    //Nalazi konsultaciju sa najmanjim zakazanim vremenom a koja nije pocela ili se zavrsila
+    this.findNextConsultForNotification = function (callback) {
+        var date = new Date(new Date().toString() + sequelize.options.timezone);
+        var date = new Date(date);
+        models.dbmodels.Consult.min('sc_time', { where: { sc_time: { [Op.gte]: date}}, s_time: null, e_time: null}).then(mindate => {
+            models.dbmodels.Consult.findOne({ where: { sc_time: mindate } }).then(consult => {
+                callback(consult);
+            });
+        });
+    }
 
     //Pocinje konsultaciju
     this.startConsult = function (consult, callback) {
@@ -490,7 +524,28 @@ var Storage = function () {
             });
         });
     }
-
+    //Odobrava zahtev za konsultaciju
+    this.approvedConsultRequest = function (student, subjectId, callback) {
+        models.dbmodels.ConsultRequest.findAll({ where: { studentId: student.id, subjectId: subjectId }, order: [['time', 'ASC']] }).then(request => {
+            if (request[0] == undefined)
+                callback(null);
+            else
+                request[0].update({ status: 'approved'}).then(() => {
+                    callback();
+                });
+        });
+    }
+    //Odbija konsultaciju
+    this.rejectedConsultRequest = function (student, subjectId, callback) {
+        models.dbmodels.ConsultRequest.findOne({ where: { studentId: student, subjectId: subjectId }}).then(request => {
+            if (!request)
+                callback(null);
+            else
+                request.update({ status: 'rejected' }).then(() => {
+                    callback();
+                });
+        });
+    }
     //Brise zahtev za konsultaciju
     this.deleteConsultRequest = function (student, subject, callback) {
         models.dbmodels.ConsultRequest.findOne({ where: { studentId: student, subjectId: subject } }).then(request => {
